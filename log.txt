@@ -1746,3 +1746,23 @@ branch=main
 repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
 worktree=main
 parent_agent=none
+
+## [2026-10-25T21:10:00+05:30] Execution observations added to open questions
+
+User Prompt (verbatim, secrets redacted):
+ok , add the above items to open questions  as -  execution observations
+will check and get back
+
+Agent Response Summary:
+Appended an "Execution observations" section (EO-1..EO-6) to docs/OPEN_QUESTIONS.md with the points raised after Session 6: the 3b/tier-5 shortcut decision, optimistic sample metrics, untested paths, usage-report cache hits, packaging/environment and process items. No code changed.
+
+Actions:
+* Edited docs/OPEN_QUESTIONS.md
+
+Context:
+tool=Claude Code
+model=claude-sonnet-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
