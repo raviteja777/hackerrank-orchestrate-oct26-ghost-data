@@ -1549,3 +1549,161 @@ branch=main
 repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
 worktree=main
 parent_agent=none
+## [2026-10-25T12:57:00+05:30] Session 5 review: OQ-15 and OQ-16 resolved
+
+User Prompt (verbatim, secrets redacted):
+session 5 is done 
+check open ques -  q 15 and 16 seem straight forword 
+resolve those first 
+
+then confirm i want to discuss on q14
+
+Agent Response Summary:
+Re-ran tests (all pass) and the sample evaluation (status 32/32, P/R/F1 0.995/0.964/0.979, sequence-exact 26/32, citations 71/75), matching Claude Code's report. Approved OQ-15: a screenshot detail panel or title bar naming a resource is a presence observation within the G-STP-08 window, while header and table rows only link; promoted W-EVD-04 to G-EVD-04. Approved OQ-16 with a refinement found by testing split_flagged: a request whose only deletion sentence is instruction-like is left undecided by the rules, so the rules should then analyse the full text, mark low confidence and log before falling back to the default. Confirmed readiness to discuss OQ-14.
+
+Actions:
+* Ran pytest, code/evaluation/main.py --samples, and intent.split_flagged/rules_decide on three injection sentences
+* Edited docs/OPEN_QUESTIONS.md (OQ-15, OQ-16) and docs/RULES.md (G-EVD-04)
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T13:03:00+05:30] OQ-14 walkthrough: tier-5 tie-break on the case_21 slot
+
+User Prompt (verbatim, secrets redacted):
+walk me thru an example for the above , step by step
+
+Agent Response Summary:
+Walked through the real 6-case slot at reported_at 2026-09-05 12:00 (case_21, case_23, case_536, case_546, case_547, case_548): 14 run events, tier 1 assigns 5 by identifiers, tier 3b assigns accounts 410 and 9155, and tier 5 blindly pairs the remaining 4 anchors (by time) with the 4 account-less cases (by case number), giving case_21 account_294 instead of the true account_6440. Found two improvements: (1) bug: case_536 is a non-deletion request (case_533-542) but sits in the tie-break pool, so intent must be applied before resolution; (2) evidence-based tier 4b before the blind tie-break, audit-capture co-occurrence (the account appears in a file captured within 24 h before exactly one remaining candidate's audit): it resolves 2 of 56 tier-5 accounts, both correct on samples (including case_21 -> account_6440); 44 have no file mention. Also flagged a stable secondary sort key for anchors with equal timestamps (7015 and 6440 at -58.1 min).
+
+Actions:
+* Ran the M3/M5 resolution on the slot and an audit-capture co-occurrence measurement over all tier-5 accounts (read-only)
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T13:41:00+05:30] Deferred tie-break with an ambiguity queue (D12)
+
+User Prompt (verbatim, secrets redacted):
+or , shall we differ the deterministic one last - let all rows complete 
+we accumulate ambigous ones in a queue 
+ then deterministic ones - hopefully some resolve along the way ?
+
+Agent Response Summary:
+Checked resolve.py: tier 5 already runs last, after a global pass of all evidence tiers, but without an explicit queue or propagation between tie-break assignments. Measured the queue at that point: 45 slots with account-less cases, and no remaining anchor spans more than one slot, so slots are independent and deferral alone cannot resolve more; only information added before the queue helps (intent exclusion, tier 4b). Adopted the user's design as D12: global evidence fixpoint, explicit ambiguity queue written to a CSV for the report, then the tie-break most-constrained slot first with propagation after each assignment, plus intent-before-resolution and tier 4b. Closed OQ-14 and put the changes first in the session 6 prompt.
+
+Actions:
+* Read code/ghost/resolve.py tier 5; ran a queue-shape measurement (read-only)
+* Edited docs/DECISIONS.md (D12), docs/OPEN_QUESTIONS.md (OQ-14), docs/CLAUDE_CODE_KICKOFF.md (session 6)
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T13:48:00+05:30] Plain-language summary of the resolution order
+
+User Prompt (verbatim, secrets redacted):
+ok - to put it in simple terms 
+
+* hard eveidence goes out 
+* deduced ones and good candidates go next 
+* then ambigous ones have two stages : 
+   *  llm decison maker - if we have good enuf support 
+* then a final pass to a deterministic low confidence one 
+
+
+is it correct ?
+
+Agent Response Summary:
+Confirmed the summary with three precisions: (1) intent comes before everything (non-deletion cases leave the pool); (2) 'deduced' covers elimination, timing chains and the audit-capture rule, and every deduction re-runs elimination until nothing changes; (3) the LLM stage only handles residuals that depend on reading unstructured content, must pick one of the parked candidates with a cited reason and is validated, while purely symmetric residuals skip it; the final deterministic pass applies only to accounts, and unattributable optional records are not output. Mapped each layer to its tier and to the confidence level reported.
+
+Actions:
+* No files changed
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T13:52:00+05:30] Resolution as graph traversal with state updates
+
+User Prompt (verbatim, secrets redacted):
+ok , so we are pretty much doing a graph traversal and updating the state as we go 
+the ones with "known finalized states" , "deduced states", "deducible by support (LLM ones)  --> are elimanated 
+
+the remaining hard case residuals -> low conf determinism 
+
+is this correct ?
+
+Agent Response Summary:
+Confirmed the framing as constraint propagation over the case graph: known (tier 1), deduced (tiers 3/3b/4b) and LLM-supported (tier 4) links are fixed and removed from the ambiguity set, each fix prunes other candidates and propagation repeats to a fixpoint, and only residual accounts get the low-confidence deterministic tie-break. Clarified two distinctions: the record-level state (present/absent/redacted at audit_at) is computed separately by replaying evidence edges, while the propagation concerns ownership links; and residual optional records are dropped rather than guessed. Added the one-line model to DESIGN section 8.3.
+
+Actions:
+* Edited docs/DESIGN.md (section 8.3 one-line model)
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T13:53:00+05:30] Pre-session-6 sweep and session 6 prompt check
+
+User Prompt (verbatim, secrets redacted):
+ok , do a sweep , check session 6 prompt , and confirm 
+i will move
+
+Agent Response Summary:
+Swept repo and docs: all build-time OQs (7-16) answered; seeded OQ-1..5 closed with defaults applied; OQ-6 (row order) left open for the user to check Discord before the final run. No secrets in code or cache (only the env-var name), no tracked pycache, cache size 308 KB. Planning-doc edits since M5 are uncommitted. Rewrote the session 6 prompt into Part A (D12 fixes and the OQ-16 refinement with the regression guard, then commit) and Part B (final-profile run twice for determinism, an explicit checklist of every element the evaluation and usage reports must contain per the problem statement, README Solution section, packaging with pycache removal and a secret grep, final validation and commit).
+
+Actions:
+* Inspected git status, OPEN_QUESTIONS statuses, evaluation report headings, cache contents and secret references (read-only)
+* Edited docs/OPEN_QUESTIONS.md (seeded statuses), docs/CLAUDE_CODE_KICKOFF.md (session 6 rewritten), docs/CHECKLIST.md (session 6 target)
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T13:58:00+05:30] OQ-6 closed: numeric row order final
+
+User Prompt (verbatim, secrets redacted):
+[excerpt: "OQ-6 (row order) stays open until you check Discord."] no update on it , but the generic guideline is go by sample data 
+so we stick with numeric
+
+Agent Response Summary:
+Closed OQ-6 and confirmed D1 (numeric input order) as final. Updated the session 6 prompt so Part B no longer waits on the row-order question.
+
+Actions:
+* Edited docs/OPEN_QUESTIONS.md, docs/DECISIONS.md, docs/CLAUDE_CODE_KICKOFF.md
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+

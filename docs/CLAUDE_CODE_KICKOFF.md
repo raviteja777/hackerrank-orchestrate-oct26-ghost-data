@@ -66,11 +66,22 @@ Acceptance (local profile): 10/10 non-deletion eval requests detected (case_533.
 
 ## Session 6: M6 (final run, reports, packaging)
 ```
-Read docs/DESIGN.md §13, §14 (M6), §18 and README.md (packaging). Log per AGENTS.md.
-Run the full pipeline with `--llm-profile final` (D11); generate code/evaluation/evaluation_report.md (metrics, ablations, >=6 custom cases, failures and fixes) and code/evaluation/usage_report.md (from the usage ledger of this final run).
-Add the "Solution" section to README.md (setup, run, architecture, limitations incl. W-CEIL-01 and D8 tie-breaks).
-Build code.zip with the README command (no dataset, no .venv, no __pycache__, no nested archives, no secrets). Run the validator one last time and stop.
+Read AGENTS.md, docs/DESIGN.md §13, §14 (M6), §18, docs/DECISIONS.md (D12), docs/REVIEW_S3_S4.md, and README.md (packaging). Log per AGENTS.md.
+
+PART A: small fixes (local profile). Re-run the sample evaluation after EACH; status must stay 32/32 and F1 must not drop below 0.979. Report before/after numbers.
+ 1. D12: apply intent before resolution (NOT_APPLICABLE cases never compete for anchors); add tier 4b (audit-capture co-occurrence: an unassigned account mentioned in a file captured <= 24 h before exactly one remaining candidate's audit_at goes to that case); write the ambiguity queue to code/evaluation/ambiguity_queue.csv; run tier 5 most-constrained slot first, with propagation after each assignment; keep the stable secondary key resource_id.
+ 2. OQ-16 refinement: undecided after dropping flagged sentences -> rules on the full text, low confidence, logged; add that sentence to the injection custom case.
+ 3. git commit.
+
+PART B: final run. OQ-6 is closed: D1 numeric input order is final; output rows must follow the input row order exactly.
+ 4. python code/main.py --llm-profile final  (writes ./output.csv; the validator must pass). Run it a second time: output.csv must be byte-identical.
+ 5. Evaluation report code/evaluation/evaluation_report.md must explicitly contain: case-level status accuracy; step-level P/R/F1; field-level accuracy per field; sequence accuracy (exact + LCS); citation accuracy; ablations (G-STP-08 on/off, 3b on/off, tier 5 on/off, D12 before/after, intent rules vs LLM); per-tier counts and the ambiguity-queue summary (how many tier-5 low-confidence assignments); the >= 8 custom cases with results; "Failures found and improvements made" incl. the M4 RCA (docs/REVIEW_S3_S4.md §3) and OQ-10..16 outcomes; known limits (W-CEIL-01 ceiling, tier-5 guesses, 3b as a probable generator artifact). All metrics from the final-profile run.
+ 6. Usage report code/evaluation/usage_report.md from the usage ledger of THIS final run only: providers and model names; calls per model (cached calls flagged with original token counts); input and output tokens (incl. thinking tokens); total and average tokens per request (/518); estimated total and per-request cost per model and overall (prices in config.py, with the date and source).
+ 7. README.md "Solution" section: setup (Python, venv, requirements, Tesseract + TESSERACT_CMD, ANTHROPIC_API_KEY via env or .env, optional Ollama), run commands (local vs final profile), architecture summary (linkage chain, D8/D12 tiers, evidence-over-claims, time cut-off), outputs, limitations.
+ 8. Package: delete code/**/__pycache__, then build code.zip with the README command (README.md + code/; no dataset, no .venv, no nested archives, no .env). List the zip contents in the log and confirm no secret is inside (grep for "sk-ant").
+ 9. Final validator run, git commit, then stop.
 ```
+
 
 ---
 ### Notes for the user

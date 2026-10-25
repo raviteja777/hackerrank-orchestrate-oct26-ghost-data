@@ -27,7 +27,7 @@ Still to do right before Session 1:
 | 3 | M3 runs + D8 tiers | 08:30 | [ ] 927 hard links · [ ] ≥361/518 eval accounts · [ ] sample precision ≥38/39 |
 | 4 | M4 scored output | 11:30 | [ ] status ≥30/32 · [ ] step F1 ≥0.85 · [ ] sequence-exact ≥22/32 · [ ] 518 rows validate |
 | 5 | M5 intent + screenshots | 14:00 | [ ] 10/10 non-deletion · [ ] 44/44 screenshot variants · [ ] cross-check summary |
-| 6 | M6 final run + reports + zip | 16:00 | [ ] validator passes · [ ] both reports complete · [ ] `code.zip` built |
+| 6 | M6 final run + reports + zip | 17:00 | [ ] validator passes · [ ] both reports complete · [ ] `code.zip` built |
 Buffer 16:00–18:00 for fixes and submission. **From M4 on, always keep a valid `output.csv` committed.**
 
 After **every** session:

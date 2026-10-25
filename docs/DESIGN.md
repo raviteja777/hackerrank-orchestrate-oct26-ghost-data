@@ -291,6 +291,8 @@ Gap defaults (flag-controlled, reported in evaluation): expired retention / hold
 - Windows relative to `reported_at`: anchor ("submitted primary profile") −80…−40 min; policy action ("Policy action completed") −35…0; final result / checks +30…+125; scenario style (other deletion_worker messages) −10…+15.
 - Chains (W-LNK-05, tier 3b): follow-up joins anchor if `(t_e − t_a) mod 30 s` ∈ 9–11 (policy) / 20–22 (final, check); single match → chain member, multi → parked.
 
+**One-line model (user's framing, 2026-10-25):** resolution is constraint propagation over the case graph. Each (resource → case) link is in one of four states: *known* (validated evidence, tier 1), *deduced* (forced by constraints or chains, tiers 3 / 3b / 4b), *supported* (LLM choice among parked candidates backed by cited content, tier 4), or *residual*. Every newly fixed link removes options elsewhere and propagation repeats to a fixpoint. Only residual **accounts** get the low-confidence deterministic tie-break (tier 5); residual optional records are not emitted.
+
 ### 8.3 Resolution tiers (`resolve.py`, D8; each tier switchable via config, contribution reported)
 1. **Hard** (naked singles are assigned only *after* all hard links, and rejected if the case already has a resource of that type, H-STP-05; amended after M4, OQ-13): slot event (or evidence-only resource) whose resource has a validated `mentions` path to exactly one slot case at fact_time ≤ that case's audit_at. Evidence-only resources (audit records, replica copies, attachments, legacy copies) are added to the case if linked (inventory = run ∪ evidence-only, G-LNK-01).
 2. **Park**: ambiguity table `resource → candidate cases, candidate rules`.
