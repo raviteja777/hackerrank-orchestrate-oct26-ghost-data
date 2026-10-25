@@ -120,7 +120,7 @@ This repository includes [`AGENTS.md`](./AGENTS.md), which instructs compatible 
 A deterministic evidence pipeline with a narrow, cached LLM layer. Rules decide; models only *read* (request intent, screenshot meaning, content residuals) and can never set a status, a step, a citation or an ordering.
 
 ### Setup
-1. Python 3.10+ (developed on 3.14). From the repository root:
+1. Python 3.14 (tested; the code needs 3.10+ syntax, older 3.1x versions are untested). From the repository root:
    ```bash
    python -m venv .venv
    .venv/Scripts/python -m pip install -r code/requirements.txt     # Windows
@@ -133,11 +133,11 @@ A deterministic evidence pipeline with a narrow, cached LLM layer. Rules decide;
 
 ### Run
 ```bash
-python code/main.py --llm-profile final      # submission run: Anthropic models (haiku-5-5 intent, sonnet-5-5 vision, opus-5-5 tier 4)
+python code/main.py --llm-profile final      # submission run: Anthropic models (haiku-5-5 intent, sonnet-5-5 vision, opus-5-5 tier 4, not triggered in the final run)
 python code/main.py --llm-profile local      # development run: Ollama models
 python code/main.py --no-llm                 # rules only: no model calls at all
 ```
-`main.py` writes `output.csv` at the repository root (rows in the input order of `dataset/deletion_requests.csv`, sorted by that order, 518 rows) and runs the validator (header, row count and order, JSON, 15 allowed operation/state pairs, numbering, ordering, per-status rules, one verification per resource, every cited id exists and is not later than `audit_at`); it exits non-zero on any issue. `--run-label NAME` tags the usage ledger. Model answers are cached by content hash in `code/cache/llm` (profile and model are part of the key), screenshot OCR in `code/cache/images`; the committed cache lets a run be reproduced without API access, and two runs produce a byte-identical `output.csv`.
+`main.py` writes `output.csv` at the repository root (rows in the input order of `dataset/deletion_requests.csv`, sorted by that order, 518 rows) and runs the validator (header, row count and order, JSON, 15 allowed operation/state pairs, numbering, ordering, per-status rules, one verification per resource, every cited id exists and is not later than `audit_at`); it exits non-zero on any issue. `--run-label NAME` tags the usage ledger. Model answers are cached by content hash in `code/cache/llm` (profile and model are part of the key), screenshot OCR in `code/cache/images`; the committed cache lets a run be reproduced without API access, and two runs produce a byte-identical `output.csv`. The submitted `output.csv` does not depend on model access at all: `--no-llm` (rules only) reproduces it byte for byte, verified on 2026-10-25. Without a flag the profile defaults to `local`; an unreachable model or a missing key is reported and never fatal.
 
 Other commands: `python code/evaluation/main.py --write-report --llm-profile final` (sample metrics, ablations, full-dataset tier counts, intent table, custom cases), `python code/evaluation/usage_report.py --run final_run_1` (usage report from the ledger), `python code/evaluation/custom_cases.py`, `python -m pytest code/tests -q`.
 
@@ -160,7 +160,7 @@ deletion_worker runs ─ slots by reported_at ─ tiers ─ case inventory ─ s
 `output.csv` (repository root), `code/evaluation/evaluation_report.md` (metrics, ablations, custom cases, failures found and improvements, limits), `code/evaluation/usage_report.md` (models, calls, tokens, cost of the final run), `code/evaluation/ambiguity_queue.csv`, `log.txt` (chat transcript).
 
 ### Limitations
-Three sample answers are unreachable from participant data (`audit_record_6645`, `audit_record_5569`, `account_004`, W-CEIL-01). Attributions made by tier 5 carry no evidence and are low confidence; the timing-phase chains of tier 3b are a probable generator artifact; unattributable all-null optional records are not emitted; screenshot OCR loses tokens at small scale. Details and numbers: `code/evaluation/evaluation_report.md`.
+Three sample answers are unreachable from participant data (`audit_record_6645`, `audit_record_5569`, `account_004`, W-CEIL-01). Attributions made by tier 5 carry no evidence and are low confidence; the timing-phase chains of tier 3b rely on the run cadence of the activity stream (verified out of sample on unlabelled eval slots, `docs/probes/P15_shortcut_diligence.py`; a dataset with another cadence would need re-validation); 10 eval cases (case_33, 35, 39, 46, 50, 52, 53, 55, 61, 63) have no deletion run; for 9 of them the decisive evidence is a screenshot captured the day before `audit_at`, whose identifiers are extracted but whose screen state is not turned into an observation, so G-STP-08 emits no step and they are output as COMPLETE with an empty array (`reported_status` is not used as a fallback); no sample case cites a screenshot, so this path has no labelled example; unattributable all-null optional records are not emitted; screenshot OCR loses tokens at small scale. Details and numbers: `code/evaluation/evaluation_report.md`.
 
 ## Packaging `code.zip` and Submission
 

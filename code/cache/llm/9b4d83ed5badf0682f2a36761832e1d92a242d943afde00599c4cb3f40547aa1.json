@@ -1,1 +1,0 @@
-{"data": {"ok": true}, "raw": "{\"ok\": true}", "usage": {"input_tokens": 216, "output_tokens": 9, "thinking_tokens": 0, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "service_tier": "standard", "stop_reason": "end_turn"}, "provider": "anthropic", "model": "claude-haiku-5-5", "profile": "final"}

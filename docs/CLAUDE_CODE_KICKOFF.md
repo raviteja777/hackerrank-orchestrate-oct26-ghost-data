@@ -88,3 +88,28 @@ PART B: final run. OQ-6 is closed: D1 numeric input order is final; output rows 
 - Between sessions, glance at `docs/OPEN_QUESTIONS.md`; bring OPEN items back to the planning chat.
 - Keep `.env` (copy of `.env.example` with your key) out of git; `.gitignore` already excludes it.
 - After the final session: export each Claude Code session with `/export` and collect `~/.claude/projects/` JSONL files into `agent-trace/claude-code/` (see `agent_trace_instructions.md`); export this planning chat via claude.ai Settings → Privacy → Export data.
+
+## Session 7 (approved, time-boxed 60 min): EO-7 screenshot presence evidence
+```
+Read AGENTS.md, docs/OPEN_QUESTIONS.md EO-7, docs/DESIGN.md §5 (screenshots) and §6 (state). Log per AGENTS.md.
+STEP 0: git restore code/cache/.gitkeep if missing; delete output_run1.csv / output_bkup.csv if present; commit the current state ("pre-EO-7 baseline"). Copy output.csv to output_baseline.csv (untracked, not zipped) for the diff.
+
+Context: each of the 11 PNGs is captured about one day before audit_at of one scenario case (evidence_04 case_34, _09 case_35, _14 case_39, _19 case_50, _23 case_52, _28 case_53, _32 case_55, _37 case_45, _42 case_46, _46 case_61, _60 case_63). PNG facts carry validated mentions but empty signals, so assess() sees no observation and G-STP-08 drops the resource; 9 of these cases are COMPLETE with []. Example: evidence_23 shows export_1260, owner ingrid.dahl@outlook.com, status Ready -> case_52 should be INCOMPLETE (FINDING REPORT_REMAINING_RECORD PRESENT evidence_23, then the policy's remediation and verification, as in sample case_08). DESIGN/README already say screenshot detail panels are presence evidence; implement that, nothing else.
+
+Change:
+ 1. A PNG fact whose header/detail panel names a catalog resource id gets an observation at file captured_at: present=True by default; present=False only on an explicit absence cue in that panel (not found / deleted / removed / expired / no records). Keep the existing explicit cues (restore allowed, enabled, direct identifiers).
+ 2. A PNG fact with a validated identifier of a case's user in header/detail links its resource to that case as evidence-only, also when the resource appears in deletion_worker runs, provided no run tier assigned it to another case.
+ 3. Do not guess for gate-failed images (evidence_42, evidence_46).
+ 4. Report only (no change): which cases the 4 PDFs relate to (user and resource ids, captured_at vs audit_at), and why output.csv cites no PDF while the sample cites one.
+
+PHASE 1, test on cached model outputs (no new API spend): `python code/main.py --llm-profile final --run-label eo7_test` (all calls must be cache hits; if any call is fresh, report it) and `python code/main.py --no-llm --output <temp>`.
+Guardrails (all must hold, else `git checkout -- .`, keep the baseline output, and go to WIND-UP):
+ - sample metrics byte-identical: status 32/32, F1 0.984, sequence-exact 26/32, citations 72/75 (no sample cites a PNG);
+ - output.csv diff vs output_baseline.csv touches only case_33..case_63; list every changed case with before/after status and steps;
+ - validator passes; pytest passes; the --no-llm output is byte-identical to the eo7_test output.
+If all hold: commit ("EO-7: screenshot presence evidence"), then STOP and tell the user to do the fresh run.
+
+FRESH RUN (the user does it manually): caches moved aside, `python code/main.py --llm-profile final --run-label final_run_2`, repeat run, hash compare.
+
+WIND-UP (Claude Code, after the user confirms the fresh run, or right away if Phase 1 was reverted): regenerate code/evaluation/evaluation_report.md (`python code/evaluation/main.py --write-report --llm-profile final`; add EO-7 to "Failures found and improvements made" with the before/after numbers) and code/evaluation/usage_report.md (`--run final_run_2`, or `final_run_1` if reverted); update README (usage command, EO-7 limitation: fixed or still open); validator; pytest; commit; delete __pycache__; rebuild code.zip with the README command; check the zip has no __pycache__ / .env / dataset / venv entries and no "sk-ant"; delete output_baseline.csv; stop.
+```

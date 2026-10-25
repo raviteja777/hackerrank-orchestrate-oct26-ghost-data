@@ -15,25 +15,24 @@ No sampling parameters are sent (current models reject them); thinking is adapti
 
 | Model | Calls (fresh + cached) | Input tokens | Output tokens | of which thinking tokens | Cache-write / cache-read input tokens |
 |---|---|---|---|---|---|
-| claude-haiku-5-5 | 20 (20 fresh + 0 cached) | 42,509 | 26,048 | 0 | 0 / 0 |
-| claude-sonnet-5-5 | 2 (0 fresh + 2 cached) | 8,632 | 536 | 0 | 0 / 0 |
-| **All models** | 22 (20 fresh + 2 cached) | 51,141 | 26,584 | | |
+| claude-haiku-5-5 | 20 (20 fresh + 0 cached) | 42,509 | 26,359 | 0 | 0 / 0 |
+| claude-sonnet-5-5 | 2 (2 fresh + 0 cached) | 8,632 | 536 | 0 | 0 / 0 |
+| **All models** | 22 (22 fresh + 0 cached) | 51,141 | 26,895 | | |
 
 ### Cached calls (flagged, original token counts)
 A cached call was answered from the local content-hash cache; its tokens were billed in the earlier run that created the entry (here: the `final`-profile smoke run of the 32 samples) and are listed at their original counts.
 
 | Model | Cached calls | Original input tokens | Original output tokens |
 |---|---|---|---|
-| claude-sonnet-5-5 | 2 | 8,632 | 536 |
 
 ## Tokens per request
 
 | Measure | Value |
 |---|---|
-| Total tokens, all calls in the ledger (input + output) | 77,725 |
-| Average tokens per request (/518) | 150.0 |
-| Total tokens billed in this run (fresh calls only) | 68,557 |
-| Average billed tokens per request (/518) | 132.3 |
+| Total tokens, all calls in the ledger (input + output) | 78,036 |
+| Average tokens per request (/518) | 150.6 |
+| Total tokens billed in this run (fresh calls only) | 78,036 |
+| Average billed tokens per request (/518) | 150.6 |
 
 ## Estimated cost
 
@@ -47,8 +46,8 @@ Prices (USD per million tokens, input / output), checked 2026-10-06. Source: Ant
 
 | Model | Cost, all calls at original counts (USD) | Cost billed in this run, fresh calls only (USD) | Per request, all calls (USD) |
 |---|---|---|---|
-| claude-haiku-5-5 | 0.0173 | 0.0173 | 0.000033 |
-| claude-sonnet-5-5 | 0.0226 | 0.0000 | 0.000044 |
-| **Overall** | **0.0399** | **0.0173** | **0.000077** |
+| claude-haiku-5-5 | 0.0174 | 0.0174 | 0.000034 |
+| claude-sonnet-5-5 | 0.0226 | 0.0226 | 0.000044 |
+| **Overall** | **0.0401** | **0.0401** | **0.000077** |
 
 Costs are estimates from list prices; thinking tokens are part of the output tokens. Rule-based stages (identity, evidence parsing, linkage, state, policy, citations, tie-break) make no model calls, so the per-request cost is the intent classification (20 calls for 398 distinct request texts) plus two conditional screenshot readings.

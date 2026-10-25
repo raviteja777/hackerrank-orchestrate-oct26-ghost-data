@@ -130,28 +130,41 @@ Raised by Claude Code (claude-sonnet-5-5) at the end of M6, at the user's reques
 
 ### EO-2: sample metrics are optimistic (no held-out labels)
 - F1 0.984 / sequence-exact 26/32 / status 32/32 come from the 32 samples that shaped the rules and the 3b bands. The eval set is far more ambiguous (12 cases with no account step, 76 tier-5 guesses at about chance), so a lower score there is expected. Already stated under "Known limits" in `code/evaluation/evaluation_report.md`.
-- Status: OPEN (informational)
+- Status: ACKNOWLEDGED (planning chat, 2026-10-25): stated in README limitations and the evaluation report
 
 ### EO-3: paths with no labelled example
 - Screenshots: scenario cases (eval 33-63) depend on OCR label cues (`restore allowed`, `enabled`, `direct identifiers`, `not found`). Verified only on synthetic text, never against a labelled screenshot step; two screenshots (evidence_42, evidence_46) yield nothing. Weakest evidence type.
 - Unseen categories: legal hold, cache, marketing, email delivery, expired retention and `object_*` use the documented defaults (OQ-1..OQ-5); no sample step covers them.
 - Optional records: all-null analytics records with no identifier are not emitted (29 parked resources); correct if they belong to no case, costs verification steps if they do (samples: analytics_5335, analytics_4574).
 - Citation fallback (OQ-5, "no citable proof -> audit-capture file / latest subject file, low confidence"): not yet counted on the eval set; it can be measured.
-- Status: OPEN
+- Status: ACKNOWLEDGED (planning chat, 2026-10-25): accepted risks, documented; see EO-7 for the related empty COMPLETE rows
 
 ### EO-4: usage report is not entirely fresh calls
 - `usage_report.md` (run `final_run_1`): 20 haiku calls fresh, 2 sonnet screenshot calls were cache hits from the earlier smoke run (flagged, original counts 8,632 in / 536 out). Totals: 22 calls, 51,141 in / 26,584 out, about USD 0.040 at original counts, 0.017 billed in that run.
 - Option: clear the `final` entries of `code/cache/llm`, re-run with a new label, and regenerate the report so every call is fresh (about USD 0.06). Output is expected unchanged but not tested.
-- Status: OPEN
+- Status: CLOSED (2026-10-25): the user ran a fresh final run with all caches cleared; final_run_1 = 22 fresh calls, 0 cached, 51,141 in / 26,895 out, USD 0.0401 billed; output.csv byte-identical to the Claude Code output
 
 ### EO-5: packaging and environment
 - `requirements.txt` has exact recent pins (numpy 2.5.4, pandas 3.1.0, opencv-python-headless 5.0.0.93, ...), tested only on Python 3.14; the README claims 3.10+, not verified. pandas is installed but unused by the code and could be dropped.
 - Git warns that LF becomes CRLF on this Windows machine: submit the working-copy `output.csv` and `code.zip`, not a git-checkout copy.
 - Without the committed cache and without Tesseract, screenshots would need the API (vision fallback); the committed cache makes the run reproducible offline (the extracted `code.zip` reproduced `output.csv` byte for byte).
-- Status: OPEN
+- Status: CLOSED (2026-10-25): README now says tested on 3.14; pandas left pinned (unused, harmless); submit working-copy files
 
 ### EO-6: process items
 - Chat transcript: `log.txt` has every session; confirm the trace export under `agent-trace/` was done (REVIEW_S1_S2).
 - Hard-coded ids: a few scripts / tests mention sample case and resource ids (`scripts/m2_acceptance.py` ceiling list, acceptance checks); no logic in `code/ghost/` does.
 - OQ-1..OQ-5 defaults still await confirmation (OQ-6 is closed).
-- Status: OPEN
+- Status: OPEN until packaging: agent-trace export pending; hard-coded ids only in scripts/tests (accepted); OQ-1..OQ-6 closed
+
+### EO-7: 10 COMPLETE rows with an empty steps array; screenshot state not used (final sweep, planning chat)
+- Cases: case_33, 35, 39, 46, 50, 52, 53, 55, 61, 63 (scenario family, case_33-case_63). None has a deletion_worker run.
+- Correction (15:19): the first reading ("no citable evidence") came from a text-only grep and was wrong. Each of the 11 PNGs is captured about one day before the `audit_at` of one scenario case and shows that case's user: evidence_04 case_34, _09 case_35, _14 case_39, _19 case_50, _23 case_52, _28 case_53, _32 case_55, _37 case_45, _42 case_46, _46 case_61, _60 case_63. No sample case cites a PNG (0/32), so this path has no labelled example.
+- Root cause: PNG facts carry validated mentions but empty `signals`, so `assess()` finds no observation and G-STP-08 drops the resource (e.g. case_63 marketing_001 shown live on the marketing platform; case_39 data_flow_1121). For case_52 the screenshot shows export_1260 "Ready" for ingrid.dahl, but export_1260 also appears in a deletion_worker run, so the evidence-only link is skipped and no tier gives it to case_52. evidence_42 / _46 fail the OCR gate (no resource id). case_33 has no PNG: export_1842 is ABSENT only by snapshot scope, dropped by G-STP-08.
+- This contradicts what DESIGN/README already state ("screenshot detail panels as presence evidence"): a bug against the design, not a design change.
+- Decision (user, 15:29): option B, the time-boxed Claude Code fix (Session 7 in docs/CLAUDE_CODE_KICKOFF.md): test on cached model outputs first; if the guardrails hold, a fresh final run, then wind up regardless of the outcome.
+- Status: IN PROGRESS (Session 7)
+
+### EO-8: the model layer does not change the submitted output (final sweep, planning chat)
+- `python code/main.py --no-llm` writes a byte-identical output.csv (sha256 ab23ac2c..., same as both final runs). Intent rules and the LLM agree on 550/550 requests; the two screenshots sent to vision yield no facts; tier 4 (Opus) never fired.
+- Interview framing: the models are verifiers and fallbacks (intent cross-check, vision when OCR fails its quality gate, unstructured residuals), behind a deterministic core; their value is the agreement evidence and robustness for unseen data, not a change on this dataset.
+- Status: ACKNOWLEDGED (informational)
