@@ -31,11 +31,11 @@ Aligned steps (default): 187/193; TP 187, FP 0, FN 6.
 | 4 LLM residual | 0 |
 | 4b audit-capture co-occurrence | 3 |
 | 5 deterministic tie-break (low confidence) | 76 |
-| evidence-only link (audit records, attachments, copies) | 482 |
+| evidence-only link (audit records, attachments, copies) | 487 |
 | excluded by a contrary link (OQ-10) | 15 |
 | window singles rejected by H-STP-05 | 2 |
 
-Output over the 518 eval requests: {'COMPLETE': 170, 'INCOMPLETE': 338, 'NOT_APPLICABLE': 10}; cases without an account step: 12; low-confidence cases (any 3b / 4 / 5 attribution or fallback): 268.
+Output over the 518 eval requests: {'INCOMPLETE': 343, 'COMPLETE': 165, 'NOT_APPLICABLE': 10}; cases without an account step: 11; low-confidence cases (any 3b / 4 / 5 attribution or fallback): 267.
 
 ### Ambiguity queue (D12; `code/evaluation/ambiguity_queue.csv`)
 
@@ -135,6 +135,12 @@ Common causes recorded in the review: rules induced from positive examples only,
 | M6 + D12 (`final` profile, this report) | 32/32 | 1.000 / 0.969 / 0.984 | 26/32 | 12 |
 The earlier rows are development numbers recorded at the time (local profile for M5); only the last row and the tables above are final-profile results. Status stayed 32/32 and F1 never dropped.
 
+### 5. EO-7: screenshot state not used (found in the final sweep, fixed in Session 7)
+* **Found:** 10 scenario cases (case_33, 35, 39, 46, 50, 52, 53, 55, 61, 63) were COMPLETE with `[]`. Their PNG facts carried validated identifiers but no state, so `assess()` saw no observation and G-STP-08 dropped the resource, although DESIGN / README already treat screenshot detail panels as presence evidence (a bug against the design, not a design change).
+* **Fix:** a header / detail panel that names a catalog resource id is a presence observation at the file's `captured_at` (absent only on an explicit cue: not found, deleted, removed, expired, no records; the explicit restore / enabled / direct-identifier cues are kept). A PNG with a case user's validated identifier links its resource to that case as evidence-only, also when the resource appears in a deletion_worker run that no tier assigned elsewhere. Images that fail the OCR gate (evidence_42, evidence_46) are not guessed.
+* **Result:** 5 cases COMPLETE -> INCOMPLETE with a finding / remediation / verification triple: case_34 (account_5762), case_35 (search_428), case_52 (export_1260), case_63 (marketing_001) match their screens; **case_33 is doubtful** (it reuses case_52's export_1260 screenshot, captured a month before its audit). 6 stay empty: case_39 (data_flow), 50 (analytics), 55 (backup) because the panel gives no explicit state cue for that kind (no guess); case_53 because the header id is not linked to a user; case_46 and 61 because their screenshots fail the OCR gate.
+* **Validation:** sample metrics unchanged (status 32/32, F1 0.984, sequence-exact 26/32, citations 72/75), but **no sample cites a PNG**, so these five outcomes have no labelled example to compare against; they rest on the documented design and on the step pattern of samples case_07 (document as presence) and case_08 (export finding).
+
 ## Ablations (final profile, 32 samples unless noted)
 | Ablation | Result | Reading |
 |---|---|---|
@@ -158,3 +164,5 @@ The earlier rows are development numbers recorded at the time (local profile for
 * State from screenshots uses generic label cues and counts only a detail panel / title bar as a presence observation; 0.6x scale loses some OCR tokens.
 * Intent is rule-and-model based on a templated corpus; no request in the data is instruction-like (0 flagged), so the injection defence is exercised by the custom case only.
 * Expired-retention, legal-hold, cache, marketing and email-delivery treatments follow the documented defaults (OQ-1..5); no sample step uses them.
+* **Low-confidence cases (267 in `output.csv`, an internal flag that is not part of the file):** 196 are 3b-only (the phase law was verified out of sample, docs/probes/P15), 52 are tier-5 account guesses (0 effect on the case status), 11 have no account step, and 8 use a citation fallback (OQ-5).
+* **Screenshot outcomes (EO-7)** are unvalidated by any sample (no sample cites a PNG); case_33 is doubtful, and six scenario cases stay empty for lack of an explicit state cue or an identifier link (see section 5 above).
