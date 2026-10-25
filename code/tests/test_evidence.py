@@ -179,9 +179,9 @@ def test_every_manifest_file_is_accounted_for_and_pngs_unparsed():
     parsed_files = {f.file_id for f in store.facts} | {s.file_id for s in store.scopes}  # scope-only snapshots count
     unparsed = {u[0] for u in store.unparsed}
     pngs = {f.file_id for f in manifest if f.suffix == ".png"}
-    assert unparsed == pngs  # only screenshots are deferred to M5
+    assert unparsed <= pngs  # only screenshots may yield no text (M5 pipeline: OCR + conditional vision)
+    assert len(pngs - unparsed) >= 9  # the screenshots are parsed now
     assert {f.file_id for f in manifest} - unparsed - parsed_files == set()  # nothing else vanished
-    assert all(u[2].startswith("TODO(M5)") for u in store.unparsed)
 
 
 @pytest.mark.skipif(not (config.DOSSIER_DIR_EXISTS if hasattr(config, "DOSSIER_DIR_EXISTS") else (config.REPO_ROOT / "docs" / "probes" / "out" / "P02_case_03.txt").exists()),

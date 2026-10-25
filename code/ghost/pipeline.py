@@ -13,15 +13,19 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
-from . import catalog, config, intent, loaders
+from . import catalog, config, loaders
 from .citations import Citer
 from .edgelog import EdgeLog
+from .evidence.image_parser import ImageContext, make_vision
 from .evidence.normalize import build_fact_store
 from .facts import FactStore
 from .identity import IdentityIndex
+from .intent import IntentGate
+from .llm import LLMClient
+from .tier4 import make_decider
 from .loaders import DeletionRequest
 from .policy import Decision, Policy
-from .resolve import Case, Resolution, TIER_CHAIN, TIER_EVIDENCE, make_cases, resolve
+from .resolve import Case, LOW_CONFIDENCE_TIERS, Resolution, TIER_EVIDENCE, make_cases, resolve
 from .runs import ANCHOR, RunIndex, run_events
 from .state import assess
 from .steps import Step, order_steps, serialize_steps
@@ -54,16 +58,22 @@ class Context:
     resolution: Resolution
     policy: Policy
     citer: Citer
+    intent_gate: IntentGate | None = None
+    llm: LLMClient | None = None
     events_by_resource: dict[str, list] = field(default_factory=dict)
 
 
-def build_context(dataset_dir: Path | None = None, flags: config.Flags | None = None) -> Context:
+def build_context(dataset_dir: Path | None = None, flags: config.Flags | None = None, llm_profile: str | None = None,
+                  run_label: str = "", intent_texts: list[str] | None = None) -> Context:
+    """llm_profile None = rules only (no model calls): fast, used by unit tests."""
     d = dataset_dir or config.DATASET_DIR
     flags = flags or config.FLAGS
     index = IdentityIndex.from_dataset(d)
     manifest = loaders.load_evidence_manifest(d)
-    store = build_fact_store(d, index, manifest)
     activity = loaders.load_activity(d)
+    llm = LLMClient(llm_profile, run_label=run_label) if llm_profile else None
+    image_ctx = ImageContext({a.resource_id for a in activity}, make_vision(llm) if llm else None, config.CACHE_DIR / "images")
+    store = build_fact_store(d, index, manifest, image_ctx)
     reqs = loaders.load_requests(d)
     samples = loaders.load_requests(d, "sample_deletion_requests.csv")
     cases = make_cases(index, reqs, samples)
@@ -72,14 +82,18 @@ def build_context(dataset_dir: Path | None = None, flags: config.Flags | None = 
         slots[c.reported_at].append(c.case_id)
     edges = EdgeLog.build(index, store, activity)
     runs = RunIndex(run_events(activity), dict(slots), flags.chain_policy_band, flags.chain_final_band)
-    resolution = resolve(cases, runs, edges, flags)
+    by_id = {c.case_id: c for c in cases}
+    decider = make_decider(llm, index, lambda cid: by_id[cid].user_id) if llm else None
+    resolution = resolve(cases, runs, edges, flags, store, decider)
+    gate = IntentGate(llm)
+    gate.classify_all(intent_texts if intent_texts is not None else [r.request_text for r in reqs + samples])
     ev: dict[str, list] = defaultdict(list)
     for e in runs.events:
         ev[e.resource_id].append(e)
     return Context(
         d, flags, index, store, edges, runs, cases, {c.case_id: c for c in cases},
         {r.case_id: r for r in reqs + samples}, resolution, Policy(loaders.load_rules(d), flags),
-        Citer(store, {f.file_id: f.captured_at for f in manifest}), dict(ev))
+        Citer(store, {f.file_id: f.captured_at for f in manifest}), gate, llm, dict(ev))
 
 
 def case_anchor(ctx: Context, case_id: str) -> datetime | None:
@@ -101,7 +115,7 @@ def _category(ctx: Context, rid: str, audit_at: datetime) -> str | None:
 def solve_case(ctx: Context, req: DeletionRequest) -> CaseResult:
     case = ctx.case_by_id[req.case_id]
     fl = ctx.flags
-    if not intent.authorizes_deletion(req.request_text):
+    if not ctx.intent_gate.authorizes_deletion(req.request_text):
         return CaseResult(req.case_id, "NOT_APPLICABLE")  # S-STA-01
     if case.user_id is None:  # OQ-4 / X-IDN-02
         return CaseResult(req.case_id, "COMPLETE" if fl.unresolvable_email_complete else "NOT_APPLICABLE",
@@ -126,12 +140,12 @@ def solve_case(ctx: Context, req: DeletionRequest) -> CaseResult:
             res.notes.append(f"{rid}: no observation in [anchor, audit_at], no step (G-STP-08)")
             continue
         d = ctx.policy.decide(rid, sys_id, eff_cat, action, spec, a, rule_ids)
-        if assigned[rid].tier == TIER_CHAIN:
-            d.notes.append("assigned by timing-phase chain (3b): low confidence")  # OQ-11 (2)
+        if assigned[rid].tier in LOW_CONFIDENCE_TIERS:
+            d.notes.append(f"assigned by tier {assigned[rid].tier}: low confidence")  # OQ-11 (2)
             res.low_confidence = True
         res.decisions.append(d)
     if not any(x.resource_id.startswith("account_") for x in res.decisions):
-        res.notes.append("no account resolved for this case (tier 4/5 are stubs)")  # H-STP-02 not satisfiable
+        res.notes.append("no account resolved for this case")  # H-STP-02 not satisfiable
         res.low_confidence = True
     res.status = "INCOMPLETE" if any(d.violating for d in res.decisions) else "COMPLETE"
     steps: list[Step] = []

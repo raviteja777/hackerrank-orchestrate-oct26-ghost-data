@@ -122,8 +122,10 @@ def fmt_metrics(label: str, r: dict) -> str:
             f"{r['seq_exact']}/{r['cases']} | {r['lcs']:.3f} | {r['cite_ok']}/{r['cite_exp']} | {fa} |")
 
 
-def run_variant(dataset_dir: Path, flags: config.Flags, sample_reqs, expected) -> tuple[dict, dict]:
-    ctx = build_context(dataset_dir, flags)
+def run_variant(dataset_dir: Path, flags: config.Flags, sample_reqs, expected, llm_profile=None, run_label="evaluation") -> tuple[dict, dict]:
+    # intent texts: only the evaluated requests, so a `final` smoke run classifies the 32 samples and nothing else
+    ctx = build_context(dataset_dir, flags, llm_profile=llm_profile, run_label=run_label,
+                        intent_texts=[r.request_text for r in sample_reqs])
     results = {r.case_id: x for r, x in zip(sample_reqs, solve_all(ctx, sample_reqs))}
     return evaluate(results, expected), results
 
@@ -134,13 +136,16 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--write-report", action="store_true")
     ap.add_argument("--no-ablation", action="store_true")
     ap.add_argument("--diff", action="store_true", help="print every sample mismatch")
+    ap.add_argument("--llm-profile", choices=("local", "final"), default=None)
+    ap.add_argument("--no-llm", action="store_true", help="rules only (no model calls)")
+    ap.add_argument("--smoke", action="store_true", help="single default variant, usage summary of this run (final-profile smoke test)")
     args = ap.parse_args(argv)
     d = config.DATASET_DIR
     sample_reqs = loaders.load_requests(d, "sample_deletion_requests.csv")
     expected = load_expected(d)
     base = config.Flags()
     variants = [("default (G-STP-08 on, tiers 1-3b)", base)]
-    if not args.no_ablation:
+    if not args.no_ablation and not args.smoke:
         variants += [
             ("G-STP-08 off (`require_observation_to_emit=False`)", dataclasses.replace(base, require_observation_to_emit=False)),
             ("tiers 1-3 (no 3b)", dataclasses.replace(base, tier_chains=False)),
@@ -148,13 +153,18 @@ def main(argv: list[str] | None = None) -> int:
         ]
     rows, main_res = [], None
     for label, fl in variants:
-        r, res = run_variant(d, fl, sample_reqs, expected)
+        r, res = run_variant(d, fl, sample_reqs, expected, None if args.no_llm else config.get_llm_profile(args.llm_profile),
+                             "smoke" if args.smoke else "evaluation")
         rows.append(fmt_metrics(label, r))
         print(f"[{label}] status {r['status_ok']}/{r['cases']}  step P/R/F1 {r['precision']:.3f}/{r['recall']:.3f}/{r['f1']:.3f}  "
               f"sequence-exact {r['seq_exact']}/{r['cases']}  LCS {r['lcs']:.3f}  citations {r['cite_ok']}/{r['cite_exp']}")
         if main_res is None:
             main_res = (r, res)
     r, res = main_res
+    if args.smoke:
+        from ghost.llm import read_ledger, summarize
+        rows = [x for x in read_ledger() if x.get("run") == "smoke" and x["profile"] == config.get_llm_profile(args.llm_profile)]
+        print("smoke usage:", json.dumps(summarize(rows), indent=1))
     diffs = diff_lines(res, expected)
     if args.diff:
         print("\n".join(diffs))

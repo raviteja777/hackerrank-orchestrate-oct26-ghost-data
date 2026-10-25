@@ -1476,3 +1476,76 @@ branch=main
 repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
 worktree=main
 parent_agent=none
+## [2026-10-25T12:18:00+05:30] Review of sessions 3-4, OQ-12/13 decisions, RCA
+
+User Prompt (verbatim, secrets redacted):
+session 4 is done 
+
+but again we have open ques  
+i think we can approve the fixes given by claude code 
+
+but i want a review before that , and if possible an RCA why these were missed
+
+Agent Response Summary:
+Independently re-ran M4: 73 tests pass; the sample evaluation reproduces exactly (status 32/32, F1 0.976, sequence-exact 25/32, citations 69/75); the full output validates with 0 issues. Confirmed the remaining sample misses (3 ceiling, 3 accounts pending the tier-5 tie-break, 4 optional all-null analytics) and the known M5 gaps (intent stub affecting case_533-542; 71 eval cases without an account step). Approved OQ-12a/b and OQ-13.1/2 and amended G-EVD-01, G-SYS-01, DESIGN section 6 and the D8 tier order. Wrote an RCA: partial snapshots treated as complete, copy topology dropped from the state key, a naked-single ordering bug inherited from the P13 probe, and an under-specified PDF path; common causes were positive-only rule induction, milestone checks measuring discovery rather than outcome, abstraction losing evidence dimensions, and probes reused without per-error triage. Added corrective actions (regression guard, 4 custom cases, deterministic tier 5 first in M5) to the session 5 prompt.
+
+Actions:
+* Ran pytest, code/evaluation/main.py --samples --diff, and the validator on output.csv
+* Created docs/REVIEW_S3_S4.md; edited docs/OPEN_QUESTIONS.md (OQ-12, OQ-13), docs/RULES.md (G-EVD-01, G-SYS-01, sweep log), docs/DESIGN.md (sections 6, 8.3), docs/CLAUDE_CODE_KICKOFF.md (session 5)
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T12:20:00+05:30] Prompt injection: scan and defence design
+
+User Prompt (verbatim, secrets redacted):
+and another thing , which i havent discussed 
+have we found any prompt injection stuff in requests 
+either way do we need to have a filter for it
+
+Agent Response Summary:
+Scanned all 550 request texts, every text evidence file, the PDF text and the screenshot OCR for injection-like patterns: no hits (only benign words such as 'systems'). Recommended defence in depth rather than a rewriting filter, because unseen data may contain injections and LLM inputs are untrusted: bounded LLM authority (already true by design), delimited prompts marking content as data, a regex detector that flags suspicious input and routes it to the deterministic fallback without editing the text, and an injection custom evaluation case. Added DESIGN section 11.3, rule G-SEC-01 and the session 5 prompt item.
+
+Actions:
+* Regex and grep scans over dataset/*.csv, dataset/evidence and docs/probes/out OCR/PDF text
+* Edited docs/DESIGN.md (new section 11.3), docs/RULES.md (G-SEC-01), docs/CLAUDE_CODE_KICKOFF.md (session 5)
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+
+## [2026-10-25T17:10:00+05:30] Session 5: M5 intent LLM, screenshots, tier 5, LLM layer
+
+User Prompt (verbatim, secrets redacted):
+## Session 5: M5 (intent LLM, screenshots, tier 5)
+Read docs/DESIGN.md §5.1, §10, §11 and docs/SCREENSHOTS.md §5–§7; port docs/probes/P09_region_labelling.py. Log per AGENTS.md.
+Start: read docs/REVIEW_S3_S4.md; run the sample evaluation and record the baseline (status 32/32, F1 0.976, sequence-exact 25/32). FIRST implement the deterministic tier-5 tie-break (DESIGN §8.3 step 6; no LLM) so every deletion case gets an account step (H-STP-02), then intent. Re-run the sample evaluation after each feature; status must stay 32/32 and F1 must not drop.
+Implement M5 using the `local` LLM profile (DESIGN §11.2, D11): intent.py (LLM + multilingual rules, cascade, cached), image_parser.py (D5 geometry + OCR + vision LLM + cross-check, cached by sha256), llm.py (providers, cache, usage ledger), resolve tier 4 (LLM for content residuals only).
+Acceptance (local profile): 10/10 non-deletion eval requests detected (case_533..542), all samples classified as deletion; P09 44/44 region consistency on original/0.6x/1.5x/inverted variants; cross-check summary in the evaluation report. Also add the 4 RCA custom evaluation cases (REVIEW_S3_S4 §4). Implement DESIGN §11.3 (untrusted-input handling: delimited prompts, suspicious-input detector, deterministic fallback, no text rewriting) and its injection custom case. Then ONE `final`-profile smoke run on the 32 samples only, and report its token usage. Stop after M5.
+
+Agent Response Summary:
+Implemented M5. Baseline re-run: status 32/32, F1 0.976, sequence-exact 25/32. Tier-5 tie-break first: F1 0.979, sequence-exact 26/32, eval cases without an account step 71 -> 12. Added llm.py (Anthropic + Ollama providers, content-hash cache keyed by profile/model, usage ledger, no sampling params, structured outputs), llm_profiles.py, untrusted.py (delimited tags, detector, no rewriting), intent.py (rules + cascade + suspicious handling), tier4.py + resolve tier 4 (content residuals only, validated), and the screenshot pipeline (P09 geometry, row-strip OCR, conditional vision, cross-check, sha256 cache). Local profile: 10/10 non-deletion, 32/32 samples deletion, 0 wrong (20 llama3.1 calls + 1 escalation); P09 44/44; OCR identifier agreement 1.5x 11/11, inverted 11/11, 0.6x 7/11. 8 custom cases pass (4 RCA + decoys, late file, expired retention, injection/negation/multilingual intent). Sample metrics never dropped; one final-profile smoke run on the samples: same metrics, 4 calls, 12,241 input / 2,647 output tokens, about USD 0.024 (haiku-5-5 2 intent batches, sonnet-5-5 2 vision calls). pytest 85 passed. Added OQ-14..16.
+
+Actions:
+* Created code/ghost/{llm,llm_profiles,untrusted,tier4}.py, rewrote intent.py and evidence/image_parser.py; edited resolve.py (tier 4, tier 5), pipeline.py, state.py, config.py, normalize.py, evidence/__init__.py
+* Created code/evaluation/custom_cases.py, code/scripts/{m5_intent_check,m5_screenshots}.py, code/tests/test_m5.py; updated tests, evaluation harness (--smoke, --llm-profile), evaluation_report.md
+* Edited docs/OPEN_QUESTIONS.md (OQ-14, OQ-15, OQ-16)
+* Ran Ollama (llama3.1, gpt-oss:20b, gemma4:12b) for the local profile; 3 trivial Anthropic connectivity calls (run precheck) and one final-profile smoke run (run smoke); output.csv regenerated with the local profile
+
+Context:
+tool=Claude Code
+model=claude-sonnet-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none

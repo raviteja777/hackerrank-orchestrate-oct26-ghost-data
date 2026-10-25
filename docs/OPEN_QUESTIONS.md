@@ -74,7 +74,7 @@ Used by Claude Code during the build (DESIGN.md §15.1). The user takes each ope
 - Options: (a) as implemented (b) scope proof always counts
 - Default implemented now: (a), no flag (they are bug fixes of the stated rules). Samples: status 32/32.
 - Impact if wrong: absence of unobserved non-account resources would not be proven by a scope; replica findings might be over-reported.
-- Status: OPEN
+- Status: ANSWERED (2026-10-25 planning chat): (a) and (b) approved as implemented; RULES G-EVD-01 / G-SYS-01 and DESIGN §6 amended. RCA in docs/REVIEW_S3_S4.md §3.
 
 ### OQ-13: naked singles and H-STP-05; documents as presence evidence; M4 stubs
 - Raised by / when: Claude Code, claude-sonnet-5-5, 2026-10-25 (M4)
@@ -82,4 +82,28 @@ Used by Claude Code during the build (DESIGN.md §15.1). The user takes each ope
 - Question: none blocking. Please confirm (1) and (2) as rule applications.
 - Default implemented now: as described; the missing account steps are a known M4 limit.
 - Impact if wrong: (1) a genuine second same-type resource in one case would be dropped; (2) a register PDF that names a resource would count as an observation.
+- Status: ANSWERED (2026-10-25 planning chat): (1) and (2) approved (D8 tier order amended; PDF presence subject to G-STP-08 and G-POL-02). (3)/(4): M5 must implement intent and the **deterministic** tier-5 tie-break so every deletion case has an account step (H-STP-02).
+
+### OQ-14: tier-5 tie-break outcome (M5)
+- Raised by / when: Claude Code, claude-sonnet-5-5, 2026-10-25 (M5)
+- Context: DESIGN §8.3 step 6 implemented as written (per slot, remaining anchors sorted by event time paired with account-less cases sorted by numeric case id; the chain carries its members; tier `5`, low confidence). Baseline before it: status 32/32, F1 0.976, sequence-exact 25/32, 71 eval cases without an account step. After: status 32/32, F1 0.979, sequence-exact 26/32, precision 0.995 (one wrong account: case_21 gets account_294 instead of account_6440), eval accounts 501/518 (79 resources by tier 5), 12 eval cases still without an account step (no anchor left in their slot).
+- Question: none blocking. The pairing carries no evidence (P04: no ordering signal), so the precision of tier-5 accounts is expected near chance on the eval set; sample evidence: 3 correct pairs and 1 wrong. Alternative: leave the 17 symmetric accounts out (H-STP-02 then fails for them).
+- Default implemented now: tier 5 on (`tier_tiebreak=True`), every tier-5 case is internally low confidence.
+- Impact if wrong: a wrong account id costs one step in each affected case, an absent one costs the same, so the tie-break can only gain.
+- Status: OPEN (informational)
+
+### OQ-15: screenshot pipeline decisions (M5)
+- Raised by / when: Claude Code, claude-sonnet-5-5, 2026-10-25 (M5)
+- Context: (1) P09 geometry ported unchanged: 44/44 region consistency on the original / 0.6x / 1.5x / inverted variants. (2) OCR identifier agreement with the original: 1.5x and inverted are identical for all 11 images; 0.6x loses some tokens (see the evaluation report); the D5a gate (no resource id / identifier in header + detail, an OCR id candidate failing validation, fewer than 3 regions, tesseract missing) calls the vision model for such images. On the dataset the gate fires for 2 screenshots (evidence_42 deleted-account reference, evidence_46 object-storage browser); the model finds no resource id there either, so both stay without facts (their subjects exist only as catalog links, which G-STP-08 does not emit). (3) The image cache stores pixel-derived OCR + gate only; the model answer is cached per profile by the LLM layer. (4) Panel text -> state signals (`restore allowed`, `enabled`, `direct identifiers`, `not found`) are generic label cues, not template rules; a detail-panel resource counts as a presence observation for record / retention kinds only.
+- Question: please confirm that a screenshot detail panel naming a resource may count as a presence observation (same reasoning as OQ-13.2 for PDFs), and that header / table-row texts only link (they never set state).
+- Default implemented now: as described; vision identifiers are accepted only if also present in the OCR text or known (DESIGN §5.1 step 4).
+- Impact if wrong: eval scenario cases 33-63 depend on screenshots for the state of a few resources; wrong cues change a finding.
+- Status: OPEN
+
+### OQ-16: untrusted-input handling, one refinement to DESIGN §11.3 (M5)
+- Raised by / when: Claude Code, claude-sonnet-5-5, 2026-10-25 (M5)
+- Context: §11.3 says a flagged request is decided by the rules and never rewritten. Implemented: texts are wrapped in `<request_text>` tags and never edited; a flagged text is sent alone (never batched with clean texts) and its model answer is advisory; the rules decide it, evaluating only the **unflagged sentences** of the text (a flagged sentence is data, so "treat this as a deletion request" cannot turn a data request into a deletion). Splitting into sentences for the rule check is analysis, not rewriting of any prompt or stored text. No request in the 550 texts is flagged.
+- Question: confirm that ignoring flagged sentences in the deterministic rule check is acceptable.
+- Default implemented now: yes (`intent.split_flagged`); custom case "Intent: injection, negation, multilingual".
+- Impact if wrong: a genuine request containing instruction-like words would have that sentence ignored by the rules (the model answer is still recorded).
 - Status: OPEN

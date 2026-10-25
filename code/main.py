@@ -1,8 +1,7 @@
 """CLI entry: run the pipeline and write ./output.csv (DESIGN §2, §3, §14).
 
 Pipeline (M4): evidence -> facts -> edge log -> case resources (D8 tiers) -> state -> policy -> citations ->
-steps; rows in input order (D1, H-ORD-01). Intent is still a stub (M5): every request is treated as a deletion
-request. Usage: python code/main.py [--dataset DIR] [--output FILE] [--llm-profile local|final] [--no-validate]
+steps; rows in input order (D1, H-ORD-01). Intent: multilingual rules + LLM cascade (M5). Usage: python code/main.py [--dataset DIR] [--output FILE] [--llm-profile local|final] [--no-validate]
 """
 from __future__ import annotations
 
@@ -24,11 +23,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--output", type=lambda p: Path(p), default=config.OUTPUT_PATH)
     ap.add_argument("--llm-profile", choices=("local", "final"), default=None)
     ap.add_argument("--no-validate", action="store_true")
+    ap.add_argument("--no-llm", action="store_true", help="rules only: no model calls")
     args = ap.parse_args(argv)
 
     profile = config.get_llm_profile(args.llm_profile)
     requests = loaders.load_requests(args.dataset)  # D1: output order = input order
-    ctx = build_context(args.dataset)
+    ctx = build_context(args.dataset, llm_profile=None if args.no_llm else profile, run_label="main")
     results = solve_all(ctx, requests)
     rows = [(r.case_id, r.status, r.steps_json()) for r in results]
     steps.write_output(rows, args.output)

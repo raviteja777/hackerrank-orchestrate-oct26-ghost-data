@@ -62,14 +62,14 @@ def flatten(value: Any, prefix: str = "", out: dict[str, Any] | None = None, max
     return out
 
 
-def parse_file(f: EvidenceFile, dataset_dir: Path | None = None) -> ParsedFile:
+def parse_file(f: EvidenceFile, dataset_dir: Path | None = None, image_ctx=None, index_hits=None) -> ParsedFile:
     from . import json_parser, log_parser, pdf_parser, sql_parser, txt_parser
     from .image_parser import parse_image
 
     path = f.abs_path(dataset_dir)
     suffix = f.suffix
     if suffix == ".png" or suffix in (".jpg", ".jpeg"):
-        return parse_image(f, path)
+        return parse_image(f, path, image_ctx, index_hits)
     if suffix == ".pdf":
         return pdf_parser.parse(f, path)
     text = read_text(path)

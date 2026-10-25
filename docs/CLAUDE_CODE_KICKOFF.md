@@ -59,8 +59,9 @@ For every sample mismatch, write a one-line diagnosis (rule ID involved) into co
 ## Session 5: M5 (intent LLM, screenshots, tier 5)
 ```
 Read docs/DESIGN.md §5.1, §10, §11 and docs/SCREENSHOTS.md §5–§7; port docs/probes/P09_region_labelling.py. Log per AGENTS.md.
+Start: read docs/REVIEW_S3_S4.md; run the sample evaluation and record the baseline (status 32/32, F1 0.976, sequence-exact 25/32). FIRST implement the deterministic tier-5 tie-break (DESIGN §8.3 step 6; no LLM) so every deletion case gets an account step (H-STP-02), then intent. Re-run the sample evaluation after each feature; status must stay 32/32 and F1 must not drop.
 Implement M5 using the `local` LLM profile (DESIGN §11.2, D11): intent.py (LLM + multilingual rules, cascade, cached), image_parser.py (D5 geometry + OCR + vision LLM + cross-check, cached by sha256), llm.py (providers, cache, usage ledger), resolve tier 4 (LLM for content residuals only).
-Acceptance (local profile): 10/10 non-deletion eval requests detected (case_533..542), all samples classified as deletion; P09 44/44 region consistency on original/0.6x/1.5x/inverted variants; cross-check summary in the evaluation report. Then ONE `final`-profile smoke run on the 32 samples only, and report its token usage. Stop after M5.
+Acceptance (local profile): 10/10 non-deletion eval requests detected (case_533..542), all samples classified as deletion; P09 44/44 region consistency on original/0.6x/1.5x/inverted variants; cross-check summary in the evaluation report. Also add the 4 RCA custom evaluation cases (REVIEW_S3_S4 §4). Implement DESIGN §11.3 (untrusted-input handling: delimited prompts, suspicious-input detector, deterministic fallback, no text rewriting) and its injection custom case. Then ONE `final`-profile smoke run on the 32 samples only, and report its token usage. Stop after M5.
 ```
 
 ## Session 6: M6 (final run, reports, packaging)

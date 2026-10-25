@@ -29,7 +29,7 @@ def run(cases, events, edges, **flags):
     for c in cases:
         slots.setdefault(c.reported_at, []).append(c.case_id)
     runs = RunIndex(events, slots)
-    return resolve(cases, runs, edges, dataclasses.replace(config.Flags(), **flags))
+    return resolve(cases, runs, edges, dataclasses.replace(config.Flags(), **{"tier_tiebreak": False, **flags}))
 
 
 def test_classify_and_windows():
@@ -107,6 +107,34 @@ def test_evidence_only_resources_are_added_when_linked():  # G-LNK-01, H-LNK-02
     r = run(cases, [], e)
     assert set(r.assignments["c1"]) == {"audit_record_7"} and r.assignments["c1"]["audit_record_7"].tier == "ev"
     assert not run(cases, [], e, evidence_only_links=False).assignments
+
+
+def test_tier5_tiebreak_pairs_anchors_by_time_with_cases_by_number():  # DESIGN §8.3 step 6
+    cases = [case("case_10", "u1"), case("case_9", "u2")]  # numeric order: case_9 < case_10 (not lexical)
+    evs = [ev("a2", "account_2", -60, ANCHOR), ev("a1", "account_1", -70, ANCHOR)]
+    r = run(cases, evs, EdgeLog(), tier_tiebreak=True, tier_eliminate=False, tier_chains=False, exclude_foreign_links=False)
+    # earliest anchor (account_1) -> lowest case number (case_9), next anchor -> case_10; both low confidence
+    assert r.assignments["case_9"]["account_1"].tier == "5" and r.assignments["case_10"]["account_2"].tier == "5"
+    assert not run(cases, evs, EdgeLog(), tier_tiebreak=False, tier_eliminate=False, tier_chains=False).assignments
+
+
+def test_tier4_llm_only_for_content_residuals_and_validated():
+    from ghost.facts import Fact, FactStore
+    cases = [case("c1", "u1"), case("c2", "u2")]
+    evs = [ev("a1", "analytics_1", -28, POLICY), ev("a2", "analytics_2", -21, POLICY)]
+    store = FactStore()
+    store.add(Fact("f#1", "f", T0, T0, "png", "1", resource_id="analytics_1", fields={"ocr_text": "contact someone@x.io"}))
+    calls = []
+
+    def decider(rid, cands, snippets):
+        calls.append(rid)
+        return "c2" if rid == "analytics_1" else "zzz"  # an answer that is not a candidate must be ignored
+
+    slots = {T0: ["c1", "c2"]}
+    runs = RunIndex(evs, slots)
+    r = resolve(cases, runs, EdgeLog(), dataclasses.replace(config.Flags(), tier_tiebreak=False, tier_chains=False), store, decider)
+    assert calls == ["analytics_1"]  # analytics_2 has no unstructured content: no model call
+    assert r.assignments["c2"]["analytics_1"].tier == "4"
 
 
 # ---- dataset acceptance (M3) ------------------------------------------------------------------------------

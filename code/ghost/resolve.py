@@ -27,6 +27,8 @@ from .loaders import DeletionRequest
 from .runs import RunIndex
 
 TIER_HARD, TIER_SINGLE, TIER_ELIM, TIER_CHAIN, TIER_EVIDENCE = "1", "1s", "3", "3b", "ev"
+TIER_LLM, TIER_TIEBREAK = "4", "5"
+LOW_CONFIDENCE_TIERS = {TIER_CHAIN, TIER_LLM, TIER_TIEBREAK}  # OQ-11 (2): reported as low confidence
 
 
 @dataclass(frozen=True)
@@ -73,7 +75,28 @@ def _type(resource_id: str) -> str:
     return e.prefix if e else resource_id.rsplit("_", 1)[0]
 
 
-def resolve(cases: list[Case], runs: RunIndex, edges: EdgeLog, flags: Flags) -> Resolution:
+def _case_num(case_id: str) -> int:
+    tail = case_id.rsplit("_", 1)[-1]
+    return int(tail) if tail.isdigit() else 10**9
+
+
+_TEXT_KEYS = {"message_text", "message_excerpt", "note", "notes", "comment", "body", "text", "excerpt", "ocr_text"}
+
+
+def residual_snippets(store, rid: str, limit: int = 3) -> list[str]:
+    """Unstructured content about a parked resource (screenshot / PDF text, free-text fields) that carries no
+    validated identifier: the only residuals tier 4 may hand to an LLM (DESIGN §8.3 step 5)."""
+    out = []
+    for f in store.for_resource(rid):
+        if f.mentions:
+            continue
+        txt = " ".join(str(v) for k, v in f.fields.items() if v and (f.fmt in ("png", "pdf") or k.rsplit(".", 1)[-1] in _TEXT_KEYS))
+        if txt.strip():
+            out.append(f"{f.file_id}: {txt.strip()[:500]}")
+    return out[:limit]
+
+
+def resolve(cases: list[Case], runs: RunIndex, edges: EdgeLog, flags: Flags, store=None, llm_decider=None) -> Resolution:
     res = Resolution()
     by_id = {c.case_id: c for c in cases}
     events_of: dict[str, list] = defaultdict(list)
@@ -187,12 +210,48 @@ def resolve(cases: list[Case], runs: RunIndex, edges: EdgeLog, flags: Flags) -> 
         if flags.tier_eliminate:
             eliminate(TIER_ELIM)
 
-    # ---- tier 4 / 5: stubs (M3) ----------------------------------------------------------------------
+    # ---- tier 4: LLM, content residuals only (DESIGN §8.3 step 5, D10) ----------------------------------------
+    if flags.tier_llm and llm_decider is not None and store is not None:
+        calls = 0
+        for rid in sorted(cand):
+            if rid in assigned or len(cand[rid]) < 2:
+                continue
+            snippets = residual_snippets(store, rid)
+            if not snippets or calls >= flags.max_tier4_calls:
+                continue  # structurally symmetric residuals are not an LLM job: no information to add
+            calls += 1
+            choice = llm_decider(rid, sorted(cand[rid]), snippets)
+            if choice in cand[rid] and not any(_type(o) == _type(rid) and assigned[o] == choice for o in assigned):
+                assign(rid, choice, TIER_LLM)  # validated: must be one of the parked candidates
+        res.counts["tier4_calls"] = calls
+        if flags.tier_eliminate:
+            eliminate(TIER_ELIM)
+
+    # ---- tier 5: deterministic tie-break (DESIGN §8.3 step 6) -------------------------------------------------
+    # No ordering signal links cases and anchors (P04), so within a slot the remaining anchors, sorted by event
+    # time, are paired with the remaining account-less cases, sorted numerically by case id. Low confidence.
+    # Optional types left unresolved are NOT emitted; only accounts are always emitted (H-STP-02).
+    if flags.tier_tiebreak:
+        def anchor_time(a: str):
+            evs = events_of[a]
+            return min([e.t for e in evs if e.kind == "anchor"] or [e.t for e in evs])
+
+        for slot in sorted(runs.slots):
+            chains, _ = runs.chains(slot)
+            free = sorted((c for c in runs.slots[slot] if not res.case_has_account(c)), key=_case_num)
+            anchors = sorted((a for a in chains if a not in assigned and a in cand and cand[a] & set(free)),
+                             key=lambda a: (anchor_time(a), a))
+            for a, cid in zip(anchors, free):
+                if cid not in cand.get(a, ()):
+                    continue
+                assign(a, cid, TIER_TIEBREAK)
+                for m in chains[a]:  # the chain carries its members (3b)
+                    if m not in assigned and cid in cand.get(m, ()):
+                        assign(m, cid, TIER_TIEBREAK)
+
     res.parked = {r: set(c) for r, c in cand.items() if r not in assigned}
-    if flags.tier_llm and res.parked:
-        res.notes.append(f"tier 4 (LLM residual) is a stub in M3: {len(res.parked)} resources left parked")
-    if flags.tier_tiebreak and res.parked:
-        res.notes.append("tier 5 (deterministic tie-break) is a stub in M3")
+    if res.parked:
+        res.notes.append(f"{len(res.parked)} optional resources left unattributed (not emitted)")
 
     # ---- slots in the edge log -------------------------------------------------------------------------
     for slot, evs in runs.by_slot.items():

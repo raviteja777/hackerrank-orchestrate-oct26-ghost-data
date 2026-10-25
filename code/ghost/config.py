@@ -42,6 +42,7 @@ class Flags:
     tier_llm: bool = True
     tier_tiebreak: bool = True
     require_observation_to_emit: bool = True  # G-STP-08: a non-account resource needs an observation in the window
+    max_tier4_calls: int = 50  # D10 cap
     exclude_foreign_links: bool = True  # OQ-10: a validated link to another user excludes the case
     evidence_only_links: bool = True  # G-LNK-01: audit records, attachments and copies found only in evidence
     chain_policy_band: tuple = (9, 11)  # W-LNK-05, seconds mod 30

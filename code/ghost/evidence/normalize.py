@@ -139,13 +139,13 @@ def _record_to_fact(f: loaders.EvidenceFile, parsed: ParsedFile, rec: RawRecord,
 
 
 def build_fact_store(dataset_dir: Path | None = None, index: IdentityIndex | None = None,
-                     manifest: list[loaders.EvidenceFile] | None = None) -> FactStore:
+                     manifest: list[loaders.EvidenceFile] | None = None, image_ctx=None) -> FactStore:
     index = index or IdentityIndex.from_dataset(dataset_dir)
     manifest = manifest if manifest is not None else loaders.load_evidence_manifest(dataset_dir)
     store = FactStore()
     for f in manifest:  # manifest order: deterministic
         try:
-            parsed = parse_file(f, dataset_dir)
+            parsed = parse_file(f, dataset_dir, image_ctx, lambda t: bool(links(index.scan(t))))
         except Exception as exc:  # a broken file must not stop the run; it is reported
             store.unparsed.append((f.file_id, f.file_path, f"{type(exc).__name__}: {exc}"))
             continue
@@ -161,6 +161,9 @@ def build_fact_store(dataset_dir: Path | None = None, index: IdentityIndex | Non
         seen: set[str] = set()
         for rec in parsed.records:
             _record_to_fact(f, parsed, rec, index, store, seen)
+        if not store.for_file(f.file_id) and not parsed.scopes:  # every record was noise: account for the file anyway
+            store.unparsed.append((f.file_id, f.file_path, "no resource id or validated identifier recovered"
+                                   + (" (screenshot: vision gate D5a applies)" if parsed.fmt == "png" else "")))
         for sc in parsed.scopes:
             sysid = catalog.normalize_system(sc.system_id_hint)
             if sysid:
