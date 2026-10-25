@@ -1,0 +1,56 @@
+=== case_29  user=user_29  status=INCOMPLETE  reported=NOT_STARTED
+requested=2026-08-27T12:00:00Z reported=2026-08-30T12:00:00Z audit=2026-09-15T12:00:00Z
+text: I used a different email on this account before changing it. Please remove records under both addresses and switch off any integration that could copy them back into search or analytics.
+identifiers: ['+1 (312) 555-0129', 'b1d07882c40af50936b997d454d5c6518ec22754eedbbf86ca9f6a3c30cc4cf0', 'f377ccb44ed37d3b3485c1343aab7d223f60ec70c0ca511fe04c7f09dd5ea727', 'noah.f438085@outlook.com', 'noah.f4380@outlook.com', 'user_29']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    search_service       search_1993        evidence_92
+   2 FINDING      REPORT_EXPOSED_PII         analytics_platform   analytics_5208     evidence_92
+   3 FINDING      REPORT_EXPOSED_PII         support_platform     support_5281       evidence_92
+   4 FINDING      REPORT_ACTIVE_DATA_FLOW    integration_service  data_flow_3827     evidence_92
+   5 REMEDIATION  DISABLE_DATA_FLOW          integration_service  data_flow_3827     
+   6 REMEDIATION  DELETE_RECORD              search_service       search_1993        
+   7 REMEDIATION  REDACT_RECORD              support_platform     support_5281       
+   8 REMEDIATION  ANONYMIZE_RECORD           analytics_platform   analytics_5208     
+   9 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_7012       
+  10 VERIFICATION VERIFY_RECORD_ABSENT       search_service       search_1993        
+  11 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_3954  
+  12 VERIFICATION VERIFY_RECORD_REDACTED     support_platform     support_5281       
+  13 VERIFICATION VERIFY_RECORD_ANONYMIZED   analytics_platform   analytics_5208     
+  14 VERIFICATION VERIFY_DATA_FLOW_DISABLED  integration_service  data_flow_3827     
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_92] 2026-09-15T11:44:55Z [<=audit] CITED evidence/records/service_resource_export_20260915_114455.json
+    L92: "email": "noah.f438085@outlook.com",   <- ['noah.f438085@outlook.com']
+    L96: "resource_id": "analytics_5208"   <- ['analytics_5208']
+    L180: "customer_email": "noah.f438085@outlook.com",   <- ['noah.f438085@outlook.com']
+    L185: "resource_id": "data_flow_3827"   <- ['data_flow_3827']
+    L215: "email": "noah.f438085@outlook.com",   <- ['noah.f438085@outlook.com']
+    L218: "resource_id": "search_1993"   <- ['search_1993']
+    L224: "query": "noah.f438085@outlook.com",   <- ['noah.f438085@outlook.com']
+    L225: "resource_id": "search_1993"   <- ['search_1993']
+    L355: "requester_email": "noah.f438085@outlook.com",   <- ['noah.f438085@outlook.com']
+    L358: "resource_id": "support_5281"   <- ['support_5281']
+[evidence_02] 2026-09-17T12:00:00Z [>AUDIT]  evidence/records/customer_data_snapshot_bundle_20260917.json
+    L190: "resource_id": "analytics_5208",   <- ['analytics_5208']
+    L191: "user_id": "user_29",   <- ['user_29']
+    L192: "email": "noah.f4380@outlook.com",   <- ['noah.f4380@outlook.com']
+    L193: "phone": "+1 (312) 555-0129",   <- ['+1 (312) 555-0129']
+    L194: "email_hash": "b1d07882c40af50936b997d454d5c6518ec22754eedbbf86ca9f6a3c30cc4cf0",   <- ['b1d07882c40af50936b997d454d5c6518ec22754eedbbf86ca9f6a3c30cc4cf0']
+    L323: "resource_id": "data_flow_3827",   <- ['data_flow_3827']
+    L326: "subject_selector": "noah.f438085@outlook.com",   <- ['noah.f438085@outlook.com']
+    L373: "resource_id": "search_1993",   <- ['search_1993']
+    L377: "email": "noah.f438085@outlook.com",   <- ['noah.f438085@outlook.com']
+    L378: "customer_reference": "user_29"   <- ['user_29']
+    L454: "resource_id": "audit_record_3954",   <- ['audit_record_3954']
+    L455: "subject_reference": "user_29",   <- ['user_29']
+    L503: "resource_id": "support_5281",   <- ['support_5281']
+    L505: "subject_reference": "user_29",   <- ['user_29']
+    L507: "message_text": "Please send the delivery update to noah.f438085@outlook.com. The affected order includes: Running shoes."   <- ['noah.f438085@outlook.com']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3532  2026-08-30T11:06:57Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_7012 FAILED | Deletion worker submitted primary profile account_7012 to account_service.
+  activity_3541  2026-08-30T12:57:49Z [<=audit] CHECK_DATA_FLOW        deletion_worker->integration_service data_flow_3827 SUCCESS | Connector status check confirmed that data flow data_flow_3827 remains enabled.
+  activity_3542  2026-08-30T13:16:19Z [<=audit] DELETE_RECORD          deletion_worker->search_service search_1993 FAILED | Deletion worker received the final result for search_1993 from search_service.
+  activity_3543  2026-08-30T13:35:48Z [<=audit] REDACT_RECORD          deletion_worker->support_platform support_5281 FAILED | Deletion worker received the final result for support_5281 from support_platform.
+  activity_3544  2026-08-30T13:54:18Z [<=audit] ANONYMIZE_RECORD       deletion_worker->analytics_platform analytics_5208 FAILED | Deletion worker received the final result for analytics_5208 from analytics_platform.

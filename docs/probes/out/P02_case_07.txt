@@ -1,0 +1,17 @@
+=== case_07  user=user_07  status=INCOMPLETE  reported=COMPLETE
+requested=2026-08-31T11:26:00Z reported=2026-09-01T19:30:00Z audit=2026-09-12T08:00:00Z
+text: Please delete my account and the identity document I sent to support while resolving a delivery issue.
+identifiers: ['+91 98765 73142', '284c7b87b8237e241293c9e81c8f0bef10c4dc1dffefb382c45107ea40c39668', 'priya.raman@gmail.com', 'user_07']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    support_platform     support_001        evidence_58
+   2 REMEDIATION  DELETE_RECORD              support_platform     support_001        
+   3 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_007        
+   4 VERIFICATION VERIFY_RECORD_ABSENT       support_platform     support_001        
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_58] 2026-09-12T07:30:00Z CITED (binary) evidence/documents/delivery_correction_attachment.pdf
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_4007  2026-02-13T08:07:01Z [<=audit] LINK_RESOURCE_IDENTITY data_catalog->object_storage object_19 SUCCESS | Attachment catalog confirmed object_19 (delivery_confirmation_19.pdf) belongs only to priya.raman@gmail.com and user_07; no other subject is linked.
+  activity_3590  2026-09-01T19:28:39Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_007 SUCCESS | Deletion worker reported the requested operation as completed. Target resource: account_007.

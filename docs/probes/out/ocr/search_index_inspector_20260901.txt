@@ -1,0 +1,24 @@
+Neue asit Search Console © email:g.silva76@gmail.com Production Help (SC
+= Northstar Shop / Search Console / Customer Search
+era) Customer Search "= Filter Export
+Ol eemecen customer_directory_v3 / prod-eu
+— Results (2) Query details. Shard timing
+ea
+(occ Executed Latency Index Environment Shard total
+01 Sep 2026 06:00:14 UTC 184 ms customer_directory_v3 prod-eu 184 ms
+(cluster health ~ ~ ~ ~
+(ee Results (2) Updated moments ago 2recorés Raw document - search_428
+ad Display name Email Customer reference Score Last indexed index customer-directory.v3
+1) search 428 Gabriel Silva g.silva76@gmall.com user13 284 05:58:21 UTC ia search 428
+2) search 1874 - g.silva76 jr@gmall.com - an 05:55:03 UTC dlisplay_name Gabriel silva
+email g.silva76@gmail.com
+customer_reference user_13
+indexed_at 2026-09-01705:58:212
+Activity
+fe 06:00:14
+emaig.siiva76@gmail.com «2 hits
+fe 05:42:03
+customer reference:user_9842 1 hit
+fe 0si3118
+display_name:"Adti Jain «1 it
+

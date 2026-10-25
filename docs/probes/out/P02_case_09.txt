@@ -1,0 +1,26 @@
+=== case_09  user=user_61  status=INCOMPLETE  reported=NOT_STARTED
+requested=2026-09-05T09:00:00Z reported=2026-09-07T09:00:00Z audit=2026-09-16T09:00:00Z
+text: Please permanently delete the account associated with this email address. Please apply the correct treatment to records covered by the request. Please confirm when the review is complete.
+identifiers: ['+233 24 468 1056', '4ab492916c9e3a808007855c29d5de24e54c6060f21fd3221adad3768b3601a8', 'k.appiah88@gmail.com', 'user_61']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_RESTORE_RISK        backup_service       backup_4978        evidence_93
+   2 REMEDIATION  BLOCK_RESTORE              backup_service       backup_4978        
+   3 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_3960       
+   4 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_4902  
+   5 VERIFICATION VERIFY_RESTORE_BLOCKED     backup_service       backup_4978        
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_93] 2026-09-16T08:37:39Z [<=audit] CITED evidence/databases/customer_data_inventory_20260916.sql
+    L24: INSERT INTO backup_restore_entries VALUES ('backup_4978', NULL, 'k.appiah88@gmail.com', 'archive/customer-data/backup_4978.tar.zst', '1', '2026-09-16T07:59:54Z');   <- ['backup_4978', 'k.appiah88@gmail.com']
+[evidence_06] 2026-09-18T11:55:24Z [>AUDIT]  evidence/logs/structured_service_events_eu_west_20260918.log
+    L24: 2026-09-16T08:52:49Z {"severity":"DEBUG","logger":"security_service","service":"security_service","instance":"security-5","pod":"security-c548","region":"ap-south-1","trace_id":"tr-9028396","event":"audit_record_query_started","subject_ref":"user_61","attempt"   <- ['user_61']
+    L28: 2026-09-16T08:52:59Z {"severity":"DEBUG","logger":"security_service","service":"security_service","instance":"security-5","pod":"security-c548","region":"ap-south-1","trace_id":"tr-9028396","resource_id":"audit_record_4902","event":"audit_record_read_completed   <- ['audit_record_4902']
+    L79: 2026-09-16T08:57:27Z {"severity":"DEBUG","logger":"backup_service","service":"backup_service","instance":"backup-5","pod":"backup-d0a9","region":"eu-west-1","trace_id":"tr-9734969","event":"restore_policy_check_started","subject_key":"k.appiah88@gmail.com","at   <- ['k.appiah88@gmail.com']
+    L82: 2026-09-16T08:57:31Z {"severity":"DEBUG","logger":"account_service","service":"account_service","instance":"account-7","pod":"account-3cbd","region":"eu-west-1","trace_id":"tr-1463969","event":"profile_lookup_started","lookup_key":"k.appiah88@gmail.com","attem   <- ['k.appiah88@gmail.com']
+    L83: 2026-09-16T08:57:31Z {"severity":"ERROR","logger":"backup_service","service":"backup_service","instance":"backup-5","pod":"backup-d0a9","region":"eu-west-1","trace_id":"tr-9734969","resource_id":"backup_4978","event":"restore_candidate_evaluated","eligible":"t   <- ['backup_4978']
+    L86: 2026-09-16T08:57:34Z {"severity":"INFO","logger":"account_service","service":"account_service","instance":"account-7","pod":"account-3cbd","region":"eu-west-1","trace_id":"tr-1463969","resource_id":"account_3960","event":"profile_lookup_completed","rows":"0","   <- ['account_3960']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3703  2026-09-07T07:55:18Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_3960 FAILED | Deletion worker submitted primary profile account_3960 to account_service.
+  activity_3709  2026-09-07T09:51:10Z [<=audit] CHECK_RESTORE_ACCESS   deletion_worker->backup_service backup_4978 SUCCESS | Restore-access check confirmed that archive backup_4978 can still be restored.

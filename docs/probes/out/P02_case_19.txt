@@ -1,0 +1,29 @@
+=== case_19  user=user_19  status=INCOMPLETE  reported=PARTIALLY_COMPLETE
+requested=2026-08-17T12:00:00Z reported=2026-08-19T12:00:00Z audit=2026-09-15T12:00:00Z
+text: Please remove my profile and clean my personal details out of earlier support conversations. Some of those messages also relate to another customer, so the conversation itself may need to stay.
+identifiers: ['+48 625 215 867', '0a07dd11ae1d2e88f760e187e21156cf7ecf91ce24859dd8d856d3f66ca5f860', 'e.varga90@yahoo.com', 'user_19']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    search_service       search_6083        evidence_01
+   2 FINDING      REPORT_EXPOSED_PII         support_platform     support_9553       evidence_01
+   3 REMEDIATION  DELETE_RECORD              search_service       search_6083        
+   4 REMEDIATION  REDACT_RECORD              support_platform     support_9553       
+   5 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_9102       
+   6 VERIFICATION VERIFY_RECORD_ABSENT       search_service       search_6083        
+   7 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_6793  
+   8 VERIFICATION VERIFY_RECORD_REDACTED     support_platform     support_9553       
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_01] 2026-09-15T11:59:39Z [<=audit] CITED evidence/logs/service_events_ap_south_20260915.log
+    L11: 2026-09-15T11:50:57Z level=DEBUG service=support_platform instance=support-2 pod=support-70f0 region=ap-south-1 trace_id=tr-8896806 event=message_scan_started subject_key="e.varga90@yahoo.com" attempt=1   <- ['e.varga90@yahoo.com']
+    L15: 2026-09-15T11:51:08Z level=WARN service=support_platform instance=support-2 pod=support-70f0 region=ap-south-1 trace_id=tr-8896806 resource_id=support_9553 event=message_pii_scan matched_value="e.varga90@yahoo.com" detector=direct_identifier   <- ['e.varga90@yahoo.com', 'support_9553']
+    L36: 2026-09-15T11:54:07Z level=INFO service=search_service instance=search-5 pod=search-7bcf region=eu-central-1 trace_id=tr-1522605 resource_id=search_6083 event=index_query_completed index=customer_directory_v3 result=hit shard=11 took_ms=10 correlation_key="e.v   <- ['e.varga90@yahoo.com', 'search_6083']
+    L37: 2026-09-15T11:54:24Z level=DEBUG service=security_service instance=security-6 pod=security-e1a3 region=eu-central-1 trace_id=tr-6935637 event=audit_record_query_started subject_ref="user_19" attempt=1   <- ['user_19']
+    L44: 2026-09-15T11:54:34Z level=DEBUG service=security_service instance=security-6 pod=security-e1a3 region=eu-central-1 trace_id=tr-6935637 resource_id=audit_record_6793 event=audit_record_read_completed integrity_check=passed rows=1   <- ['audit_record_6793']
+    L70: 2026-09-15T11:56:41Z level=DEBUG service=account_service instance=account-4 pod=account-2ef7 region=eu-central-1 trace_id=tr-5115879 event=profile_lookup_started lookup_key="e.varga90@yahoo.com" attempt=1   <- ['e.varga90@yahoo.com']
+    L72: 2026-09-15T11:56:47Z level=INFO service=account_service instance=account-4 pod=account-2ef7 region=eu-central-1 trace_id=tr-5115879 resource_id=account_9102 event=profile_lookup_completed rows=0 http_status=404 duration_ms=63   <- ['account_9102']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3323  2026-08-19T10:52:22Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_9102 PARTIAL | Deletion worker submitted primary profile account_9102 to account_service.
+  activity_3329  2026-08-19T12:56:14Z [<=audit] REDACT_RECORD          deletion_worker->support_platform support_9553 FAILED | Deletion worker received the final result for support_9553 from support_platform.
+  activity_3332  2026-08-19T13:15:43Z [<=audit] DELETE_RECORD          deletion_worker->search_service search_6083 FAILED | Deletion worker received the final result for search_6083 from search_service.

@@ -1,0 +1,188 @@
+D
+
+=
+
+itinel
+
+Search events, users, IP addresses or references.
+
+thstar Shop / Sentinel / Account events
+
+6 signed
+
+ts
+
+Filter
+
+Actions
+
+ccount events
+
+Export
+
+ject filter: user_03 - 18-26 Aug 2026 UTC
+
+vents
+
+Categories
+
+Integrity failures
+
+Partition
+
+5
+
+0
+
+2026-Q3
+
+vents (6)
+
+Updated moments ago - 6 records
+
+audit_record_003 - Raw event
+
+ime (UTC)
+
+Event
+
+Category
+
+Subject
+
+Actor
+
+Integrity
+
+Reference
+
+event_type
+
+account_closure_recorded
+
+|] 25 Aug 04:03
+
+Account closure recorded
+
+Account lifecycle
+
+user_03
+
+Automated workflow
+
+Valid
+
+audit_record_003
+
+subject
+
+user_03
+
+Session revoked
+
+Session management
+
+user_03
+
+Security system
+
+Valid
+
+audit_record_002
+
+actor
+
+automated account workflow
+
+2 | 25 Aug 03:21
+
+recorded_at
+
+2026-08-25T04:03:00Z
+
+Recovery challenge completed
+
+Authentication
+
+user_03
+
+User (self)
+
+Valid
+
+audit_record_001
+
+1 | 24 Aug 16:14
+
+fingerprint
+
+8f0c...31ad
+
+‘| 22 Aug 11:27
+
+Email change confirmed
+
+Profile update
+
+user_03
+
+User (self)
+
+Valid
+
+audit_record_006
+
+signature
+
+Valid
+
+Authentication
+
+Valid
+
+5 | 20 Aug 09:42
+
+Login from new device
+
+user_03
+
+User (self)
+
+audit_record_005
+
+journal
+
+2026-Q3
+
+Password changed
+
+Authentication
+
+user_03
+
+User (self)
+
+Valid
+
+audit_record_004
+
+5 | 18 Aug 14:05
+
+Activity
+
+25 Aug
+
+Account closure recorded
+
+25 Aug
+
+Session revoked
+
+24 Aug
+
+Recovery challenge completed
+
+22 Aug
+
+Email change confirmed
+

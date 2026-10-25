@@ -1,0 +1,19 @@
+=== case_08  user=user_08  status=INCOMPLETE  reported=PARTIALLY_COMPLETE
+requested=2026-08-29T20:03:00Z reported=2026-08-31T13:44:00Z audit=2026-09-14T16:10:00Z
+text: I closed my account, but an old “download your data” link still works. Please delete that export file as well.
+identifiers: ['+55 11 97284-3165', '1301193d061e1845f5b6a27dbe60e896845339b5315c3a61b57d7e7636f78617', 'gabriel.costa@proton.me', 'user_08']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    export_service       export_001         evidence_59
+   2 REMEDIATION  DELETE_RECORD              export_service       export_001         
+   3 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_008        
+   4 VERIFICATION VERIFY_RECORD_ABSENT       export_service       export_001         
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_59] 2026-09-14T15:40:00Z [<=audit] CITED evidence/records/customer_export_jobs_20260914.json
+    L7: "resource_id": "export_001",   <- ['export_001']
+    L8: "owner_email": "gabriel.costa@proton.me",   <- ['gabriel.costa@proton.me']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3554  2026-08-31T13:48:58Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_008 SUCCESS | Deletion worker reported the requested operation as completed. Target resource: account_008.
+  activity_3555  2026-08-31T13:49:22Z [<=audit] DELETE_RECORD          deletion_worker->export_service export_001 FAILED | Deletion worker stopped after the target system returned an error. Target resource: export_001.

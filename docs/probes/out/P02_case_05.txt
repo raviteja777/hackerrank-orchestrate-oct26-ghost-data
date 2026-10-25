@@ -1,0 +1,17 @@
+=== case_05  user=user_05  status=INCOMPLETE  reported=COMPLETE
+requested=2026-08-27T14:17:00Z reported=2026-08-28T09:03:00Z audit=2026-09-08T13:40:00Z
+text: I deleted this account and received a confirmation, but the same email address is still recognized. Please remove any remaining copy of my profile.
+identifiers: ['+212 6 48 27 15 93', '62667ed065b846a842474f916da51b658edb0f9754ab2da6bf38e68779ff0d08', 'leila.haddad@yahoo.com', 'user_05']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    account_service      account_005        evidence_54
+   2 REMEDIATION  DELETE_RECORD              account_service      account_005        
+   3 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_005        
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_54] 2026-09-02T23:00:00Z [<=audit] CITED evidence/databases/customer_accounts_failover_replica_20260902.sql
+    L13: INSERT INTO "customer_profiles_failover_replica" VALUES('account_005','user_05','Leila Haddad','leila.haddad@yahoo.com','+212 6 48 27 15 93','ACTIVE','2026-09-02T22:45:00Z');   <- ['+212 6 48 27 15 93', 'account_005', 'leila.haddad@yahoo.com', 'user_05']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3482  2026-08-28T09:11:01Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_005 SUCCESS | Deletion worker reported the requested operation as completed. Target resource: account_005.
+  activity_3483  2026-08-28T09:11:09Z [<=audit] SYNC_RECORD            account_service->account_failover_replica account_005 SUCCESS | Replication worker reported its final checkpoint. Target resource: account_005.

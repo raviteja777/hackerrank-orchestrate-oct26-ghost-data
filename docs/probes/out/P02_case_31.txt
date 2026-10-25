@@ -1,0 +1,20 @@
+=== case_31  user=user_541  status=COMPLETE  reported=COMPLETE
+requested=2026-09-04T12:00:00Z reported=2026-09-06T12:00:00Z audit=2026-09-15T12:00:00Z
+text: I no longer need this account. Please remove my name and contact details, but keeping an internal deleted-account reference is fine if other required records still depend on it.
+identifiers: ['+234 803 052 7943', '1b7bf5a90890498cc6b7d2b50b0580ad1dbfaee7766f5d09cd87ecb548533e9e', 'a.eze08@gmail.com', 'user_541']
+
+--- ANSWER STEPS
+   1 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_4857       evidence_51
+   2 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_6909  evidence_51
+   3 VERIFICATION VERIFY_RECORD_REDACTED     identity_service     tombstone_440      evidence_51
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_51] 2026-09-15T12:00:00Z [<=audit] CITED evidence/records/customer_data_snapshot_bundle_20260915.json
+    L17: "resource_id": "tombstone_440",   <- ['tombstone_440']
+    L18: "subject_reference": "user_541",   <- ['user_541']
+    L42: "resource_id": "audit_record_6909",   <- ['audit_record_6909']
+    L43: "subject_reference": "user_541",   <- ['user_541']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3682  2026-09-06T10:45:58Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_4857 SUCCESS | Deletion worker submitted primary profile account_4857 to account_service.
+  activity_3687  2026-09-06T11:31:39Z [<=audit] REDACT_RECORD          deletion_worker->identity_service tombstone_440 SUCCESS | Policy action completed for tombstone_440.

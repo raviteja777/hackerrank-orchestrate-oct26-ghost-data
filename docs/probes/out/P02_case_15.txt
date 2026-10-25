@@ -1,0 +1,23 @@
+=== case_15  user=user_15  status=INCOMPLETE  reported=COMPLETE
+requested=2026-08-21T12:00:00Z reported=2026-08-22T12:00:00Z audit=2026-09-15T12:00:00Z
+text: I disconnected my account last week, but one of the integrations still seems active. Close the account completely and make sure it can no longer send my data to other systems.
+identifiers: ['+34 715 351 235', '+34 728 875 900', '3a998570469df6b3cf40bb58e9b2a55e4890cded9f801df993ed6584f990826c', 'lucia-torres@gmail.com', 'user_15']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_ACTIVE_DATA_FLOW    integration_service  data_flow_9846     evidence_01
+   2 REMEDIATION  DISABLE_DATA_FLOW          integration_service  data_flow_9846     
+   3 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_4745       
+   4 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_1596  
+   5 VERIFICATION VERIFY_DATA_FLOW_DISABLED  integration_service  data_flow_9846     
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_01] 2026-09-15T11:59:39Z [<=audit] CITED evidence/logs/service_events_ap_south_20260915.log
+    L22: 2026-09-15T11:51:20Z level=INFO service=account_service instance=account-1 pod=account-b3b8 region=ap-south-1 trace_id=tr-9146590 resource_id=account_4745 event=profile_lookup_completed rows=0 http_status=404 duration_ms=22 correlation_key="lucia-torres@gmail.   <- ['lucia-torres@gmail.com', 'account_4745']
+    L85: 2026-09-15T11:58:08Z level=DEBUG service=integration_service instance=integration-1 pod=integration-95c3 region=eu-central-1 trace_id=tr-9750867 event=connector_config_read_started subject_key="lucia-torres@gmail.com" attempt=1   <- ['lucia-torres@gmail.com']
+    L88: 2026-09-15T11:58:11Z level=WARN service=integration_service instance=integration-1 pod=integration-95c3 region=eu-central-1 trace_id=tr-9750867 resource_id=data_flow_9846 event=connector_heartbeat enabled=true scheduler_registered=true last_run=success   <- ['data_flow_9846']
+    L101: 2026-09-15T11:59:31Z level=DEBUG service=security_service instance=security-3 pod=security-ecfc region=ap-south-1 trace_id=tr-4314388 event=audit_record_query_started subject_ref="user_15" attempt=1   <- ['user_15']
+    L103: 2026-09-15T11:59:37Z level=DEBUG service=security_service instance=security-3 pod=security-ecfc region=ap-south-1 trace_id=tr-4314388 resource_id=audit_record_1596 event=audit_record_read_completed integrity_check=passed rows=1   <- ['audit_record_1596']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3382  2026-08-22T11:05:18Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_4745 SUCCESS | Deletion worker submitted primary profile account_4745 to account_service.
+  activity_3386  2026-08-22T12:51:10Z [<=audit] CHECK_DATA_FLOW        deletion_worker->integration_service data_flow_9846 SUCCESS | Connector status check confirmed that data flow data_flow_9846 remains enabled.

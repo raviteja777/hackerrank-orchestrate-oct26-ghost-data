@@ -1,0 +1,26 @@
+=== case_20  user=user_48  status=INCOMPLETE  reported=NOT_STARTED
+requested=2026-09-08T11:00:00Z reported=2026-09-09T11:00:00Z audit=2026-09-26T11:00:00Z
+text: Please treat this message as a request for permanent account deletion. Please check the records connected to the account before confirming completion. Please send a confirmation after the process finishes.
+identifiers: ['+233 24 014 4504', 'akosua.gyasi@gmail.com', 'fe822c22457cb0bf2c7b96098b2756bff294e939c93a5eb55b3c6438be0245ad', 'user_48']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    search_service       search_4262        evidence_94
+   2 FINDING      REPORT_ACTIVE_DATA_FLOW    integration_service  data_flow_1770     evidence_94
+   3 REMEDIATION  DISABLE_DATA_FLOW          integration_service  data_flow_1770     
+   4 REMEDIATION  DELETE_RECORD              search_service       search_4262        
+   5 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_5037       
+   6 VERIFICATION VERIFY_RECORD_ABSENT       search_service       search_4262        
+   7 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_5569  
+   8 VERIFICATION VERIFY_DATA_FLOW_DISABLED  integration_service  data_flow_1770     
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_94] 2026-09-26T10:38:56Z [<=audit] CITED evidence/logs/resource_lookup_trace_20260926_103856.log
+    L8: 2026-09-26T07:57:13Z level=DEBUG service=search_service trace_id=rb-075713-004 event=index_query_started resource_id=search_4262 lookup_key=akosua.gyasi@gmail.com   <- ['search_4262', 'akosua.gyasi@gmail.com']
+    L9: 2026-09-26T07:57:13Z level=INFO service=search_service trace_id=rb-075713-004 event=index_query_completed resource_id=search_4262 result=hit total_hits=1 index=customer_directory_v3 email=akosua.gyasi@gmail.com customer_reference=null   <- ['search_4262', 'akosua.gyasi@gmail.com']
+    L40: 2026-09-26T09:52:54Z level=DEBUG service=integration_service trace_id=rb-095254-020 event=connector_config_read_started resource_id=data_flow_1770 lookup_key=akosua.gyasi@gmail.com   <- ['data_flow_1770', 'akosua.gyasi@gmail.com']
+    L41: 2026-09-26T09:52:54Z level=INFO service=integration_service trace_id=rb-095254-020 event=connector_config_read_completed resource_id=data_flow_1770 enabled=true last_delivery_status=delivered connector_name=customer_events_connector customer_email=akosua.gyasi   <- ['data_flow_1770', 'akosua.gyasi@gmail.com']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3734  2026-09-09T10:14:55Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_5037 FAILED | Deletion worker submitted primary profile account_5037 to account_service.
+  activity_3745  2026-09-09T11:52:47Z [<=audit] CHECK_DATA_FLOW        deletion_worker->integration_service data_flow_1770 SUCCESS | Connector status check confirmed that data flow data_flow_1770 remains enabled.
+  activity_3750  2026-09-09T12:11:17Z [<=audit] DELETE_RECORD          deletion_worker->search_service search_4262 FAILED | Deletion worker received the final result for search_4262 from search_service.

@@ -1,0 +1,37 @@
+=== case_23  user=user_23  status=INCOMPLETE  reported=NOT_STARTED
+requested=2026-09-02T12:00:00Z reported=2026-09-05T12:00:00Z audit=2026-09-15T12:00:00Z
+text: Please delete this account, including the downloadable archive I requested earlier and any search result that still points to me. Security records can stay if policy requires them.
+identifiers: ['+27 72 861 6082', '5a2cb16db260ce9c10ffddc80e9ebc9b56ace8b3160a15ffe71887ca431c04d3', 'thandiwe.m6866@zoho.com', 'user_23']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    export_service       export_7364        evidence_92
+   2 FINDING      REPORT_REMAINING_RECORD    search_service       search_898         evidence_92
+   3 REMEDIATION  DELETE_RECORD              export_service       export_7364        
+   4 REMEDIATION  DELETE_RECORD              search_service       search_898         
+   5 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_410        
+   6 VERIFICATION VERIFY_RECORD_ABSENT       export_service       export_7364        
+   7 VERIFICATION VERIFY_RECORD_ABSENT       search_service       search_898         
+   8 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_4128  
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_92] 2026-09-15T11:44:55Z [<=audit] CITED evidence/records/service_resource_export_20260915_114455.json
+    L150: "object_key": "exports/export_7364/customer_data.zip",   <- ['export_7364']
+    L152: "owner_email": "thandiwe.m6866@zoho.com",   <- ['thandiwe.m6866@zoho.com']
+    L154: "resource_id": "export_7364"   <- ['export_7364']
+    L251: "email": "thandiwe.m6866@zoho.com",   <- ['thandiwe.m6866@zoho.com']
+    L254: "resource_id": "search_898"   <- ['search_898']
+    L260: "query": "thandiwe.m6866@zoho.com",   <- ['thandiwe.m6866@zoho.com']
+    L261: "resource_id": "search_898"   <- ['search_898']
+[evidence_02] 2026-09-17T12:00:00Z [>AUDIT]  evidence/records/customer_data_snapshot_bundle_20260917.json
+    L279: "resource_id": "export_7364",   <- ['export_7364']
+    L280: "owner_email": "thandiwe.m6866@zoho.com",   <- ['thandiwe.m6866@zoho.com']
+    L355: "resource_id": "search_898",   <- ['search_898']
+    L359: "email": "thandiwe.m6866@zoho.com",   <- ['thandiwe.m6866@zoho.com']
+    L360: "customer_reference": "user_23"   <- ['user_23']
+    L412: "resource_id": "audit_record_4128",   <- ['audit_record_4128']
+    L413: "subject_reference": "user_23",   <- ['user_23']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3662  2026-09-05T11:10:55Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_410 FAILED | Deletion worker submitted primary profile account_410 to account_service.
+  activity_3667  2026-09-05T12:38:47Z [<=audit] DELETE_RECORD          deletion_worker->export_service export_7364 FAILED | Deletion worker received the final result for export_7364 from export_service.
+  activity_3671  2026-09-05T12:57:17Z [<=audit] DELETE_RECORD          deletion_worker->search_service search_898 FAILED | Deletion worker received the final result for search_898 from search_service.

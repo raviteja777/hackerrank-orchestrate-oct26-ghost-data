@@ -1,0 +1,164 @@
+se Analytics
+
+9 Search users, products, orders or events...
+
+Production Help
+
+PA
+
+thstar Shop / Pulse Analytics / Users
+
+mar Darwish
+
+Last 90 days
+
+Filter
+
+r_20 - analytics_7438 - darwish.omar@icloud.com
+
+nt timeline
+
+Sessions (12)
+
+Orders (2)
+
+Products viewed (19)
+
+essions
+
+Products viewed
+
+Completed orders
+
+Revenue
+
+Mobile / Desktop
+
+Acquisition
+
+2
+
+19
+
+2
+
+USD 167.42
+
+67% | 33%
+
+Organic search
+
+no
+
+no
+
+no
+
+no
+
+vent timeline
+
+Updated moments ago - 5 records
+
+Profile attributes
+
+ime
+
+Event
+
+Product / detail
+
+Value
+
+Device
+
+Market
+
+AE
+
+1
+
+14:22
+
+Order completed
+
+Ceramic coffee set
+
+USD 84.21
+
+Mobile
+
+Audience
+
+Returning shopper
+
+Interest
+
+14:20
+
+Checkout started
+
+2 items
+
+USD 84.21
+
+Mobile
+
+Coffee & dining
+
+Last activity
+
+13 Jul 2026 14:22 UTC
+
+14:17
+
+Product viewed
+
+Ceramic coffee set
+
+Mobile
+
+First seen
+
+21 Apr 2026 09:14 UTC
+
+14:16
+
+Added to cart
+
+Ceramic coffee set
+
+USD 42.00
+
+Mobile
+
+Activity
+
+14:12
+
+Product viewed
+
+Stoneware mug
+
+USD 18.00
+
+Desktop
+
+e
+
+13 Jul
+
+6 events in active session
+
+08 Jul
+
+Order completed - USD 83.21
+
+30 Jun
+
+Product search - coffee set
+
+22 Jun
+
+Campaign opened
+

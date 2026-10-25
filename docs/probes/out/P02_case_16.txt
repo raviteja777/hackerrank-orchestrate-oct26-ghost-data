@@ -1,0 +1,26 @@
+=== case_16  user=user_53  status=INCOMPLETE  reported=NOT_STARTED
+requested=2026-08-29T10:00:00Z reported=2026-09-01T10:00:00Z audit=2026-09-21T10:00:00Z
+text: Please treat this message as a request for permanent account deletion. Please include information linked through current or earlier account identifiers. A short confirmation when the process is complete is sufficient.
+identifiers: ['+91 96023 32879', '1ecc0a4afc62297c78d36eb27b889e059bec83609e3177b8bbd42ea7648ad46e', 'diya.k4436@outlook.com', 'user_53']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    account_service      account_994        evidence_05
+   2 FINDING      REPORT_REMAINING_RECORD    search_service       search_1007        evidence_05
+   3 REMEDIATION  DELETE_RECORD              account_service      account_994        
+   4 REMEDIATION  DELETE_RECORD              search_service       search_1007        
+   5 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_994        
+   6 VERIFICATION VERIFY_RECORD_ABSENT       search_service       search_1007        
+   7 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_9528  
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_05] 2026-09-21T10:00:00Z [<=audit] CITED evidence/databases/customer_data_read_replica_20260921.sql
+    L29: INSERT INTO "customer_data_primary" VALUES('audit_record_9528','security_service','security_audit_events','{"resource_id":"audit_record_9528","subject_reference":"user_53","event_name":"account_deletion_reviewed","actor_type":"automated_privacy_workflow","inte   <- ['user_53', 'audit_record_9528']
+    L37: INSERT INTO "customer_data_primary" VALUES('search_1007','search_service','customer_search_documents','{"resource_id":"search_1007","index_name":"customer_directory_v3","document":{"display_name":"Diya Kapoor","email":"diya.k4436@outlook.com","customer_referen   <- ['user_53', 'diya.k4436@outlook.com', 'search_1007']
+    L52: INSERT INTO "customer_data_read_replica" VALUES('account_994','account_service','customer_profiles','{"resource_id":"account_994","customer_reference":"user_53","full_name":"Diya Kapoor","email":"diya.k4436@outlook.com","phone":"+91 96023 32879","account_statu   <- ['user_53', 'diya.k4436@outlook.com', 'account_994', '+91 96023 32879']
+    L67: INSERT INTO "customer_data_read_replica" VALUES('audit_record_9528','security_service','security_audit_events','{"resource_id":"audit_record_9528","subject_reference":"user_53","event_name":"account_deletion_reviewed","actor_type":"automated_privacy_workflow",   <- ['user_53', 'audit_record_9528']
+    L75: INSERT INTO "customer_data_read_replica" VALUES('search_1007','search_service','customer_search_documents','{"resource_id":"search_1007","index_name":"customer_directory_v3","document":{"display_name":"Diya Kapoor","email":"diya.k4436@outlook.com","customer_re   <- ['user_53', 'diya.k4436@outlook.com', 'search_1007']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3571  2026-09-01T08:50:41Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_994 FAILED | Deletion worker submitted primary profile account_994 to account_service.
+  activity_3577  2026-09-01T10:41:33Z [<=audit] SYNC_RECORD            account_service->account_replication_cluster account_994 SUCCESS | Replication worker reported its final checkpoint for account_994.
+  activity_3580  2026-09-01T11:00:03Z [<=audit] DELETE_RECORD          deletion_worker->search_service search_1007 SUCCESS | Deletion worker received the final result for search_1007 from search_service.

@@ -1,0 +1,15 @@
+=== case_04  user=user_04  status=COMPLETE  reported=COMPLETE
+requested=2026-08-25T12:32:00Z reported=2026-08-27T08:54:00Z audit=2026-09-07T10:20:00Z
+text: I’m deleting my account. You can keep anonymous statistics, but nothing in analytics should still point back to me.
+identifiers: ['+27 71 684 5928', 'f730ef60615bde7a8f5ee21138637b4e9d4094855fbb02da6afcdba9c076281f', 'thandiwe.n@gmail.com', 'user_04']
+
+--- ANSWER STEPS
+   1 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_004        evidence_54
+   2 VERIFICATION VERIFY_RECORD_ANONYMIZED   analytics_platform   analytics_901      evidence_56
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_56] 2026-09-07T09:45:00Z [<=audit] CITED evidence/records/customer_analytics_report_20260907.json
+    L7: "resource_id": "analytics_901",   <- ['analytics_901']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3463  2026-08-27T08:47:41Z [<=audit] ANONYMIZE_RECORD       deletion_worker->analytics_platform analytics_901 SUCCESS | Deletion worker reported the requested operation as completed. Target resource: analytics_901.

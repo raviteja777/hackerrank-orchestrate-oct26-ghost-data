@@ -1,0 +1,24 @@
+=== case_21  user=user_21  status=COMPLETE  reported=COMPLETE
+requested=2026-09-04T12:00:00Z reported=2026-09-05T12:00:00Z audit=2026-09-15T12:00:00Z
+text: I deleted my account and received the confirmation email. Could you verify that the profile is gone and that anything retained for security is limited to what is required?
+identifiers: ['+234 803 344 7640', '54fa93ada0b4b649d835b69845ab99bcb2d907311ddae4e2822e371f637f9ee9', 'amara-okeke@proton.me', 'user_21']
+
+--- ANSWER STEPS
+   1 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_6440       evidence_92
+   2 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_3737  evidence_92
+   3 VERIFICATION VERIFY_RECORD_ANONYMIZED   analytics_platform   analytics_5335     evidence_92
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_92] 2026-09-15T11:44:55Z [<=audit] CITED evidence/records/service_resource_export_20260915_114455.json
+    L46: "resource_id": "account_6440",   <- ['account_6440']
+    L105: "resource_id": "analytics_5335"   <- ['analytics_5335']
+    L288: "resource_id": "audit_record_3737",   <- ['audit_record_3737']
+    L290: "subject_reference": "user_21"   <- ['user_21']
+[evidence_02] 2026-09-17T12:00:00Z [>AUDIT]  evidence/records/customer_data_snapshot_bundle_20260917.json
+    L59: "resource_id": "analytics_5335",   <- ['analytics_5335']
+    L398: "resource_id": "audit_record_3737",   <- ['audit_record_3737']
+    L399: "subject_reference": "user_21",   <- ['user_21']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3661  2026-09-05T11:01:53Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_6440 SUCCESS | Deletion worker submitted primary profile account_6440 to account_service.
+  activity_3665  2026-09-05T11:31:34Z [<=audit] ANONYMIZE_RECORD       deletion_worker->analytics_platform analytics_5335 SUCCESS | Policy action completed for analytics_5335.

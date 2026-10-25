@@ -1,0 +1,47 @@
+=== case_26  user=user_26  status=COMPLETE  reported=NOT_STARTED
+requested=2026-08-30T12:00:00Z reported=2026-09-02T12:00:00Z audit=2026-09-15T12:00:00Z
+text: I found an old report saying my account still existed. Please check the latest state and confirm that the profile is gone and that remaining records cannot identify me.
+identifiers: ['+55 21 90180-9087', 'a10867f0e5d747ce148149d94b42ccb9917cc719ab2107662d1789f4a121aa01', 'almeida.mariana@gmail.com', 'user_26']
+
+--- ANSWER STEPS
+   1 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_5684       evidence_92
+   2 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_5416  evidence_92
+   3 VERIFICATION VERIFY_RECORD_REDACTED     support_platform     support_4715       evidence_92
+   4 VERIFICATION VERIFY_RECORD_ANONYMIZED   analytics_platform   analytics_4566     evidence_92
+   5 VERIFICATION VERIFY_DATA_FLOW_DISABLED  integration_service  data_flow_6244     evidence_92
+   6 VERIFICATION VERIFY_RESTORE_BLOCKED     backup_service       backup_3120        evidence_92
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_92] 2026-09-15T11:44:55Z [<=audit] CITED evidence/records/service_resource_export_20260915_114455.json
+    L40: "resource_id": "account_5684",   <- ['account_5684']
+    L78: "resource_id": "analytics_4566"   <- ['analytics_4566']
+    L121: "archive_key": "archive/customer-data/backup_3120.tar.zst",   <- ['backup_3120']
+    L123: "customer_reference": "user_26",   <- ['user_26']
+    L125: "resource_id": "backup_3120",   <- ['backup_3120']
+    L190: "customer_reference": "user_26",   <- ['user_26']
+    L194: "resource_id": "data_flow_6244"   <- ['data_flow_6244']
+    L309: "resource_id": "audit_record_5416",   <- ['audit_record_5416']
+    L311: "subject_reference": "user_26"   <- ['user_26']
+    L343: "customer_reference": "user_26",   <- ['user_26']
+    L349: "resource_id": "support_4715"   <- ['support_4715']
+[evidence_02] 2026-09-17T12:00:00Z [>AUDIT]  evidence/records/customer_data_snapshot_bundle_20260917.json
+    L11: "resource_id": "account_5684",   <- ['account_5684']
+    L12: "customer_reference": "user_26",   <- ['user_26']
+    L14: "email": "almeida.mariana@gmail.com",   <- ['almeida.mariana@gmail.com']
+    L15: "phone": "+55 21 90180-9087",   <- ['+55 21 90180-9087']
+    L107: "resource_id": "analytics_4566",   <- ['analytics_4566']
+    L251: "resource_id": "backup_3120",   <- ['backup_3120']
+    L253: "subject_reference": "user_26",   <- ['user_26']
+    L299: "resource_id": "data_flow_6244",   <- ['data_flow_6244']
+    L302: "subject_selector": "user_26",   <- ['user_26']
+    L433: "resource_id": "audit_record_5416",   <- ['audit_record_5416']
+    L434: "subject_reference": "user_26",   <- ['user_26']
+    L482: "resource_id": "support_4715",   <- ['support_4715']
+    L484: "subject_reference": "user_26",   <- ['user_26']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3600  2026-09-02T11:08:43Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_5684 FAILED | Deletion worker submitted primary profile account_5684 to account_service.
+  activity_3603  2026-09-02T11:31:24Z [<=audit] ANONYMIZE_RECORD       deletion_worker->analytics_platform analytics_4566 SUCCESS | Policy action completed for analytics_4566.
+  activity_3605  2026-09-02T11:38:53Z [<=audit] REDACT_RECORD          deletion_worker->support_platform support_4715 SUCCESS | Policy action completed for support_4715.
+  activity_3606  2026-09-02T11:45:23Z [<=audit] DISABLE_DATA_FLOW      deletion_worker->integration_service data_flow_6244 SUCCESS | Policy action completed for data_flow_6244.
+  activity_3607  2026-09-02T11:52:52Z [<=audit] BLOCK_RESTORE          deletion_worker->backup_service backup_3120 SUCCESS | Policy action completed for backup_3120.

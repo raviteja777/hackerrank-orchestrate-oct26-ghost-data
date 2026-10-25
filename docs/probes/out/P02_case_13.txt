@@ -1,0 +1,26 @@
+=== case_13  user=user_33  status=INCOMPLETE  reported=NOT_STARTED
+requested=2026-09-08T12:00:00Z reported=2026-09-09T12:00:00Z audit=2026-10-01T12:00:00Z
+text: Please close my account and process the associated personal-data deletion. Please check the records connected to the account before confirming completion. Please contact me if you need information to verify the request.
+identifiers: ['+971 54 271 5338', 'd0a2e5544c329cf0a0fd3bffcb8551c9beaf04e1c65c44f7d87635dfffc9af89', 'noor-khalil@proton.me', 'user_33']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    search_service       search_1308        evidence_03
+   2 FINDING      REPORT_REMAINING_RECORD    support_platform     support_4218       evidence_03
+   3 REMEDIATION  DELETE_RECORD              search_service       search_1308        
+   4 REMEDIATION  DELETE_RECORD              support_platform     support_4218       
+   5 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_9335       
+   6 VERIFICATION VERIFY_RECORD_ABSENT       search_service       search_1308        
+   7 VERIFICATION VERIFY_RECORD_ABSENT       support_platform     support_4218       
+   8 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_4816  
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_03] 2026-10-01T12:00:00Z [<=audit] CITED evidence/records/customer_account_handover_20261001.txt
+    L15: - 2026-10-01T12:00:00Z | account_service | account_9335 | USER_PROFILE | NOT_FOUND | noor-khalil@proton.me   <- ['noor-khalil@proton.me', 'account_9335']
+    L27: - 2026-10-01T12:00:00Z | search_service | search_1308 | SEARCH_INDEX_ENTRY | FOUND | noor-khalil@proton.me   <- ['search_1308', 'noor-khalil@proton.me']
+    L34: - 2026-10-01T12:00:00Z | security_service | audit_record_4816 | SECURITY_AUDIT_LOG | FOUND | user_33   <- ['user_33', 'audit_record_4816']
+    L43: - 2026-10-01T12:00:00Z | support_platform | support_4218 | SUPPORT_ATTACHMENT | FOUND | noor-khalil@proton.me   <- ['support_4218', 'noor-khalil@proton.me']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3739  2026-09-09T10:53:28Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_9335 FAILED | Deletion worker submitted primary profile account_9335 to account_service.
+  activity_3752  2026-09-09T12:39:20Z [<=audit] DELETE_RECORD          deletion_worker->support_platform support_4218 FAILED | Deletion worker received the final result for support_4218 from support_platform.
+  activity_3756  2026-09-09T12:58:49Z [<=audit] DELETE_RECORD          deletion_worker->search_service search_1308 FAILED | Deletion worker received the final result for search_1308 from search_service.

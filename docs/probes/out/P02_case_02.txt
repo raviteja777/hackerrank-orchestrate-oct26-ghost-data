@@ -1,0 +1,12 @@
+=== case_02  user=user_02  status=COMPLETE  reported=PARTIALLY_COMPLETE
+requested=2026-08-21T18:06:00Z reported=2026-08-22T07:25:00Z audit=2026-09-04T15:00:00Z
+text: Intenté eliminar mi cuenta ayer, pero la página terminó mostrando un error. ¿Pueden comprobar si todavía queda algún dato y completar la eliminación si hace falta?
+identifiers: ['+34 612 847 593', 'fad1c282b6b8ff346ee92e617331f69c2b6bb345af954eeb44581c57529eab9d', 'mateo.rios@outlook.com', 'user_02']
+
+--- ANSWER STEPS
+   1 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_002        evidence_54
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3376  2026-08-22T07:30:03Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_002 PARTIAL | Deletion worker completed some internal work but could not confirm the final state. Target resource: account_002.

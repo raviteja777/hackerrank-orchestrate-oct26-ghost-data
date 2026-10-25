@@ -1,0 +1,170 @@
+stomer Download Center
+
+9 Search exports...
+
+Production Help
+
+cD
+
+thstar Shop / Customer Download Center / Data exports
+
+4jobs
+
+Filter
+
+ata exports
+
+Export
+
+ate and manage customer download packages
+
+exports
+
+Ready
+
+Processing
+
+Expired
+
+eady
+
+Processing
+
+Created today
+
+Downloads today
+
+2
+
+1
+
+0
+
+as
+
+~~
+
+as
+
+~~
+
+as
+
+~~
+
+~
+
+~~
+
+\ll exports
+
+Updated moments ago : 4 records
+
+export_1260
+
+xport ID
+
+Filename
+
+Owner
+
+Status
+
+Created
+
+Owner
+
+ingrid.dahl@outlook.com
+
+1
+
+export_1261
+
+customer_export_1261.zip
+
+marcus.lee@northstar.shop
+
+Collecting
+
+20 Jun 14:18 UTC
+
+Created
+
+18 Jun 2026 06:42 UTC
+
+2
+
+export_1260
+
+customer_export_1260.zip
+
+ingrid.dahl@outlook.com
+
+Ready
+
+18 Jun 06:42 UTC
+
+Expires
+
+25 Jun 2026 06:42 UTC
+
+Size
+
+18.4 MB
+
+3
+
+export_1259
+
+customer_export_1259.zip
+
+sara.kim@northstar.shop
+
+Packaging
+
+17 Jun 11:03 UTC
+
+Checksum
+
+SHA-256 - 41ca09...
+
+:
+
+export_1258
+
+customer_export_1258.zip
+
+daniel.park@northstar.shop
+
+Ready
+
+16 Jun 09:27 UTC
+
+Download count
+
+°
+
+Included
+
+Profile - Orders - Saved addresses
+
+Activity
+
+e
+
+06:46
+
+Ready for download
+
+06:45
+
+Package created
+
+06:43
+
+Collecting customer records
+
+06:42
+
+Export requested
+

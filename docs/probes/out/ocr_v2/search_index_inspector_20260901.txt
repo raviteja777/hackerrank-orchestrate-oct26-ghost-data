@@ -1,0 +1,148 @@
+arch Console
+
+2 email:g.silva76@gmail.com
+
+Production Help
+
+sc
+
+thstar Shop / Search Console / Customer Search
+
+2 hits
+
+Filter
+
+ustomer Search
+
+tomer_directory_v3 / prod-eu
+
+sults (2)
+
+Query details
+
+Shard timing
+
+xecuted
+
+Latency
+
+Index
+
+Environment
+
+Shard total
+
+11 Sep 2026 06:00:14 UTC
+
+184 ms
+
+customer_directory_v3
+
+prod-eu
+
+184 ms
+
+po
+
+-
+
+-
+
+po
+
+-
+
+-
+
+po
+
+-
+
+po
+
+-
+
+-
+
+tesults (2)
+
+Updated moments ago - 2 records
+
+Raw document - search_428
+
+id
+
+Display name
+
+Email
+
+Customer reference
+
+Score
+
+Last indexed
+
+index
+
+customer_directory_v3
+
+1
+
+search_428
+
+Gabriel Silva
+
+g.silva76@gmail.com
+
+user_13
+
+9.84
+
+05:58:21 UTC
+
+~
+
+id
+
+search_428
+
+2
+
+search_1874
+
+g.silva76.jr@gmail.com
+
+4.12
+
+05:55:03 UTC
+
+display_name
+
+Gabriel Silva
+
+email
+
+g.silva76@gmail.com
+
+customer_reference user_13
+
+indexed_at
+
+2026-09-01T05:58:21Z
+
+Activity
+
+e
+
+06:00:14
+
+email:g.silva76@gmail.com - 2 hits
+
+05:42:03
+
+customer_reference:user_9842 - 1 hit
+
+05:31:18
+
+display_name:*Aditi Jain" - 1 hit
+

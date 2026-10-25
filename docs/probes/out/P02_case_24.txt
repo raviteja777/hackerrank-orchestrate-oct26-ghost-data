@@ -1,0 +1,37 @@
+=== case_24  user=user_24  status=INCOMPLETE  reported=COMPLETE
+requested=2026-09-01T12:00:00Z reported=2026-09-02T12:00:00Z audit=2026-09-15T12:00:00Z
+text: I was told that deletion was complete, but the account and its search result can still be found. Please investigate and finish the deletion.
+identifiers: ['+81 90 2669 6684', 'dcbef21cf1c49652e5af01b9719d87b096e1fdfe6b9f956910fe298dc63fa710', 'keiko.nakamura@gmail.com', 'user_24']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    account_service      account_5334       evidence_92
+   2 FINDING      REPORT_REMAINING_RECORD    search_service       search_5577        evidence_92
+   3 REMEDIATION  DELETE_RECORD              account_service      account_5334       
+   4 REMEDIATION  DELETE_RECORD              search_service       search_5577        
+   5 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_5334       
+   6 VERIFICATION VERIFY_RECORD_ABSENT       search_service       search_5577        
+   7 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_7095  
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_92] 2026-09-15T11:44:55Z [<=audit] CITED evidence/records/service_resource_export_20260915_114455.json
+    L23: "email": "keiko.nakamura@gmail.com",   <- ['keiko.nakamura@gmail.com']
+    L28: "resource_id": "account_5334",   <- ['account_5334']
+    L233: "email": "keiko.nakamura@gmail.com",   <- ['keiko.nakamura@gmail.com']
+    L236: "resource_id": "search_5577"   <- ['search_5577']
+    L242: "query": "keiko.nakamura@gmail.com",   <- ['keiko.nakamura@gmail.com']
+    L243: "resource_id": "search_5577"   <- ['search_5577']
+[evidence_02] 2026-09-17T12:00:00Z [>AUDIT]  evidence/records/customer_data_snapshot_bundle_20260917.json
+    L43: "resource_id": "account_5334",   <- ['account_5334']
+    L44: "customer_reference": "user_24",   <- ['user_24']
+    L46: "email": "keiko.nakamura@gmail.com",   <- ['keiko.nakamura@gmail.com']
+    L47: "phone": "+81 90 2669 6684",   <- ['+81 90 2669 6684']
+    L364: "resource_id": "search_5577",   <- ['search_5577']
+    L368: "email": "keiko.nakamura@gmail.com",   <- ['keiko.nakamura@gmail.com']
+    L369: "customer_reference": "user_24"   <- ['user_24']
+    L419: "resource_id": "audit_record_7095",   <- ['audit_record_7095']
+    L420: "subject_reference": "user_24",   <- ['user_24']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3599  2026-09-02T10:59:41Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_5334 SUCCESS | Deletion worker submitted primary profile account_5334 to account_service.
+  activity_3608  2026-09-02T12:45:33Z [<=audit] SYNC_RECORD            account_service->account_replication_cluster account_5334 SUCCESS | Replication worker reported its final checkpoint for account_5334.
+  activity_3610  2026-09-02T13:04:03Z [<=audit] DELETE_RECORD          deletion_worker->search_service search_5577 SUCCESS | Deletion worker received the final result for search_5577 from search_service.

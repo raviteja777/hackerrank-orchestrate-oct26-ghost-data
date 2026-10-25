@@ -1,0 +1,122 @@
+HC
+
+pline Console
+
+9 Search tickets, customers, orders...
+
+Production Help
+
+thstar Shop / Helpline Console / Inbox
+
+Filter
+
+S-5034 - Where is my delivery? = ‘\*°"“?
+
+jport_1034 - Kofi Agyeman - Normal priority
+
+nversation
+
+Internal notes
+
+Activity
+
+ustomer
+
+Email
+
+Assigned
+
+Tags
+
+cofi Agyeman
+
+kagyeman8947@fastmail.com
+
+Maya Chen
+
+Delivery - Tracking - Order update
+
+-onversation
+
+Updated moments ago : 4 records
+
+Order ORD-20265034
+
+ime
+
+Sender
+
+Message
+
+Product
+
+Running shoes
+
+09:12
+
+Kofi Agyeman
+
+Could you let me know where my order is and when it is expected to arrive?
+
+Status
+
+In transit
+
+09:13
+
+Northstar Bot
+
+We received your message and are checking the order details.
+
+Carrier
+
+SwiftShip
+
+Tracking
+
+SWF-884103
+
+09:28
+
+Maya Chen
+
+The parcel reached the regional hub and is on track for delivery on 26 May.
+
+Expected
+
+26 May 2026
+
+09:35
+
+Kofi Agyeman
+
+Thanks for the update.
+
+Assigned agent
+
+Maya Chen
+
+Activity
+
+e
+
+22 May
+
+Order confirmed
+
+23 May
+
+Dispatched
+
+24 May 07:46
+
+Reached regional hub
+
+24 May 08:15
+
+In transit
+
+26 May
+
+Delivery expected
+

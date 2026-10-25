@@ -1,0 +1,12 @@
+=== case_01  user=user_01  status=COMPLETE  reported=COMPLETE
+requested=2026-08-18T09:14:00Z reported=2026-08-20T16:42:00Z audit=2026-09-03T11:30:00Z
+text: Hi, I haven’t used this account in years and would like it closed. Please remove the profile and the personal details attached to it.
+identifiers: ['+971 50 482 7316', 'amina.elmasri@gmail.com', 'd4e1f59abcf9a1e0cfdc7c27ad6c07ed4ff88b326a16ed5eed5ec6bc31618c93', 'user_01']
+
+--- ANSWER STEPS
+   1 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_001        evidence_54
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3342  2026-08-20T16:41:43Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_001 SUCCESS | Deletion worker reported the requested operation as completed. Target resource: account_001.

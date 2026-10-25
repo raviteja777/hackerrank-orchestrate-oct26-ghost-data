@@ -1,0 +1,22 @@
+=== case_12  user=user_12  status=INCOMPLETE  reported=COMPLETE
+requested=2026-08-24T12:00:00Z reported=2026-08-25T12:00:00Z audit=2026-09-15T12:00:00Z
+text: I changed the email on this account before deleting it. Please check that nothing tied to the old address was left behind, even in systems that do not display the email.
+identifiers: ['+82 10 2466 4678', '44a65154bfd8e408852578fbd76813d094d1944f255ac1769ee81ba90492f10e', '6e34ae5737be5401d915eb47a87a17264110c5a4e61c06f20b6a121f1520b9d2', 'minjun.kim90@gmail.com', 'minjun.kim@gmail.com', 'user_12']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    analytics_platform   analytics_9914     evidence_01
+   2 REMEDIATION  DELETE_RECORD              analytics_platform   analytics_9914     
+   3 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_9797       
+   4 VERIFICATION VERIFY_RECORD_ABSENT       analytics_platform   analytics_9914     
+   5 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_2945  
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_01] 2026-09-15T11:59:39Z [<=audit] CITED evidence/logs/service_events_ap_south_20260915.log
+    L63: 2026-09-15T11:55:40Z level=DEBUG service=security_service instance=security-4 pod=security-ab9e region=us-east-2 trace_id=tr-3845100 resource_id=audit_record_2945 event=audit_record_read_completed integrity_check=passed rows=1 correlation_key="user_12"   <- ['audit_record_2945', 'user_12']
+    L73: 2026-09-15T11:56:49Z level=DEBUG service=account_service instance=account-2 pod=account-898d region=eu-west-1 trace_id=tr-8001359 event=profile_lookup_started lookup_key="minjun.kim@gmail.com" attempt=1   <- ['minjun.kim@gmail.com']
+    L76: 2026-09-15T11:56:57Z level=INFO service=account_service instance=account-2 pod=account-898d region=eu-west-1 trace_id=tr-8001359 resource_id=account_9797 event=profile_lookup_completed rows=0 http_status=404 duration_ms=11   <- ['account_9797']
+    L92: 2026-09-15T11:58:26Z level=DEBUG service=analytics_platform instance=analytics-2 pod=analytics-9b40 region=ap-south-1 trace_id=tr-9137340 resource_id=analytics_9914 event=contact_lookup_completed rows=1 email_opt_in=true correlation_key="44a65154bfd8e408852578   <- ['44a65154bfd8e408852578fbd76813d094d1944f255ac1769ee81ba90492f10e', 'analytics_9914']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3432  2026-08-25T11:07:59Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_9797 SUCCESS | Deletion worker submitted primary profile account_9797 to account_service.
+  activity_3435  2026-08-25T12:53:51Z [<=audit] DELETE_RECORD          deletion_worker->analytics_platform analytics_9914 FAILED | Deletion worker received the final result for analytics_9914 from analytics_platform.

@@ -1,0 +1,43 @@
+=== case_28  user=user_28  status=COMPLETE  reported=NOT_STARTED
+requested=2026-08-28T12:00:00Z reported=2026-08-30T12:00:00Z audit=2026-09-15T12:00:00Z
+text: Can you verify that my account was deleted? A search result with a similar email belongs to someone else, so please do not treat that record as mine.
+identifiers: ['+34 744 502 860', '5951510123a31517eee05595926fe7c9784e0f7fc16bb3a913b5768375486ea1', 'smartinez6461@gmail.com', 'user_28']
+
+--- ANSWER STEPS
+   1 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_5482       evidence_92
+   2 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_9265  evidence_92
+   3 VERIFICATION VERIFY_RECORD_REDACTED     support_platform     support_2351       evidence_92
+   4 VERIFICATION VERIFY_RECORD_ANONYMIZED   analytics_platform   analytics_6077     evidence_92
+   5 VERIFICATION VERIFY_DATA_FLOW_DISABLED  integration_service  data_flow_2337     evidence_92
+   6 VERIFICATION VERIFY_RESTORE_BLOCKED     backup_service       backup_838         evidence_92
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_92] 2026-09-15T11:44:55Z [<=audit] CITED evidence/records/service_resource_export_20260915_114455.json
+    L34: "resource_id": "account_5482",   <- ['account_5482']
+    L114: "resource_id": "analytics_6077"   <- ['analytics_6077']
+    L137: "archive_key": "archive/customer-data/backup_838.tar.zst",   <- ['backup_838']
+    L139: "customer_reference": "user_28",   <- ['user_28']
+    L141: "resource_id": "backup_838",   <- ['backup_838']
+    L172: "customer_reference": "user_28",   <- ['user_28']
+    L176: "resource_id": "data_flow_2337"   <- ['data_flow_2337']
+    L316: "resource_id": "audit_record_9265",   <- ['audit_record_9265']
+    L318: "subject_reference": "user_28"   <- ['user_28']
+    L325: "customer_reference": "user_28",   <- ['user_28']
+    L331: "resource_id": "support_2351"   <- ['support_2351']
+[evidence_02] 2026-09-17T12:00:00Z [>AUDIT]  evidence/records/customer_data_snapshot_bundle_20260917.json
+    L161: "resource_id": "analytics_6077",   <- ['analytics_6077']
+    L265: "resource_id": "backup_838",   <- ['backup_838']
+    L267: "subject_reference": "user_28",   <- ['user_28']
+    L315: "resource_id": "data_flow_2337",   <- ['data_flow_2337']
+    L318: "subject_selector": "user_28",   <- ['user_28']
+    L447: "resource_id": "audit_record_9265",   <- ['audit_record_9265']
+    L448: "subject_reference": "user_28",   <- ['user_28']
+    L496: "resource_id": "support_2351",   <- ['support_2351']
+    L498: "subject_reference": "user_28",   <- ['user_28']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3529  2026-08-30T10:46:13Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_5482 FAILED | Deletion worker submitted primary profile account_5482 to account_service.
+  activity_3534  2026-08-30T11:31:53Z [<=audit] ANONYMIZE_RECORD       deletion_worker->analytics_platform analytics_6077 SUCCESS | Policy action completed for analytics_6077.
+  activity_3535  2026-08-30T11:38:23Z [<=audit] REDACT_RECORD          deletion_worker->support_platform support_2351 SUCCESS | Policy action completed for support_2351.
+  activity_3538  2026-08-30T11:45:52Z [<=audit] DISABLE_DATA_FLOW      deletion_worker->integration_service data_flow_2337 SUCCESS | Policy action completed for data_flow_2337.
+  activity_3539  2026-08-30T11:52:22Z [<=audit] BLOCK_RESTORE          deletion_worker->backup_service backup_838 SUCCESS | Policy action completed for backup_838.

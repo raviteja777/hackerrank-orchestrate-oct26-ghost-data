@@ -1,0 +1,21 @@
+=== case_14  user=user_37  status=INCOMPLETE  reported=COMPLETE
+requested=2026-09-04T12:00:00Z reported=2026-09-06T12:00:00Z audit=2026-10-01T12:00:00Z
+text: このメールアドレスに関連するアカウントの完全な削除を依頼します。 プライバシー手続きに従い、現在および過去の識別情報を確認してください。 確認が完了したら結果をお知らせください。
+identifiers: ['+81 90 0802 6399', '3eafe3b9e3dcda746895ba9b54148df33f38f8dc900b14acd2dfc95428493e20', 'user_37', 'y.tanaka32@gmail.com']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_RESTORE_RISK        backup_service       backup_3870        evidence_03
+   2 REMEDIATION  BLOCK_RESTORE              backup_service       backup_3870        
+   3 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_3677       
+   4 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_987   
+   5 VERIFICATION VERIFY_RESTORE_BLOCKED     backup_service       backup_3870        
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_03] 2026-10-01T12:00:00Z [<=audit] CITED evidence/records/customer_account_handover_20261001.txt
+    L9: - 2026-10-01T12:00:00Z | account_service | account_3677 | USER_PROFILE | NOT_FOUND | y.tanaka32@gmail.com   <- ['y.tanaka32@gmail.com', 'account_3677']
+    L19: - 2026-10-01T12:00:00Z | backup_service | backup_3870 | BACKUP_ARCHIVE | ACTIVE | y.tanaka32@gmail.com   <- ['backup_3870', 'y.tanaka32@gmail.com']
+    L41: - 2026-10-01T12:00:00Z | security_service | audit_record_987 | SECURITY_AUDIT_LOG | FOUND | user_37   <- ['user_37', 'audit_record_987']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3686  2026-09-06T11:11:02Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_3677 SUCCESS | Deletion worker submitted primary profile account_3677 to account_service.
+  activity_3690  2026-09-06T12:44:53Z [<=audit] CHECK_RESTORE_ACCESS   deletion_worker->backup_service backup_3870 SUCCESS | Restore-access check confirmed that archive backup_3870 can still be restored.

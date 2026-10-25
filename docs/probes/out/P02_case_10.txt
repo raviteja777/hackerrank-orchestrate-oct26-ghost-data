@@ -1,0 +1,20 @@
+=== case_10  user=user_10  status=INCOMPLETE  reported=COMPLETE
+requested=2026-08-31T15:42:00Z reported=2026-09-02T10:08:00Z audit=2026-09-18T12:25:00Z
+text: I used this Yahoo address before changing the email on my account. Please remove records linked to both the old and current addresses.
+identifiers: ['+40 723 481 638', '6385b5b5e70720c197abedd379f714bb84330a9c7bc86bbb4bfbc4405bdba326', '708ef5640eec7c7aa89a6dc39793c5df6f9bca6968397f46a8f44ff1bdde75f5', 'e407f542e6f638d23b7efa7c74bacfb3ee6c3991ca6625ad36c8dcb7dffa144a', 'n.petrescu@yahoo.com', 'nadia.ionescu@yahoo.com', 'nadia.petrescu@yahoo.com', 'user_10']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    support_platform     support_002        evidence_61
+   2 REMEDIATION  DELETE_RECORD              support_platform     support_002        
+   3 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_010        
+   4 VERIFICATION VERIFY_RECORD_ABSENT       support_platform     support_002        
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_61] 2026-09-17T22:00:19Z [<=audit] CITED evidence/logs/support_replica.log
+    L4: 2026-09-17T22:00:04Z level=DEBUG service=support_replica instance=support-eu-03 pod=replica-7c9f trace_id=tr-rp-002 event=contact_query_started lookup_key=nadia.ionescu@yahoo.com source=legacy_contact_index   <- ['nadia.ionescu@yahoo.com']
+    L5: 2026-09-17T22:00:05Z level=INFO service=support_replica instance=support-eu-03 pod=replica-7c9f trace_id=tr-rp-002 event=contact_query_completed resource_id=support_002 rows=1 latency_ms=23   <- ['support_002']
+    L6: 2026-09-17T22:00:06Z level=WARN service=support_replica instance=support-eu-03 pod=replica-7c9f trace_id=tr-rp-002 event=deletion_marker_check resource_id=support_002 marker_found=false last_write=2026-09-07T10:01:00Z   <- ['support_002']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3595  2026-09-02T10:08:37Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_010 SUCCESS | Deletion worker reported the requested operation as completed. Target resource: account_010.
+  activity_3596  2026-09-02T10:09:01Z [<=audit] DELETE_RECORD          deletion_worker->support_platform support_002 SUCCESS | Deletion worker reported the requested operation as completed. Target resource: support_002.

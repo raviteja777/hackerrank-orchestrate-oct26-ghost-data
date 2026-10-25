@@ -1,0 +1,36 @@
+=== case_11  user=user_32  status=INCOMPLETE  reported=COMPLETE
+requested=2026-09-09T12:00:00Z reported=2026-09-12T12:00:00Z audit=2026-10-01T12:00:00Z
+text: I would like the account associated with this address to be erased. Please handle any copies that fall within the scope of the deletion request. Please contact me if you need information to verify the request.
+identifiers: ['+48 601 623 422', 'c5d7aedd1046a82b5fdc1d4f8e2a2d463245cecad77e0f10aec24a5d83b0dc52', 'novak.tomasz@icloud.com', 'user_32']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    search_service       search_052         evidence_03
+   2 FINDING      REPORT_EXPOSED_PII         analytics_platform   analytics_2034     evidence_03
+   3 FINDING      REPORT_EXPOSED_PII         support_platform     support_864        evidence_03
+   4 FINDING      REPORT_ACTIVE_DATA_FLOW    integration_service  data_flow_9522     evidence_03
+   5 REMEDIATION  DISABLE_DATA_FLOW          integration_service  data_flow_9522     
+   6 REMEDIATION  DELETE_RECORD              search_service       search_052         
+   7 REMEDIATION  REDACT_RECORD              support_platform     support_864        
+   8 REMEDIATION  ANONYMIZE_RECORD           analytics_platform   analytics_2034     
+   9 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_4248       
+  10 VERIFICATION VERIFY_RECORD_ABSENT       search_service       search_052         
+  11 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_9394  
+  12 VERIFICATION VERIFY_RECORD_REDACTED     support_platform     support_864        
+  13 VERIFICATION VERIFY_RECORD_ANONYMIZED   analytics_platform   analytics_2034     
+  14 VERIFICATION VERIFY_DATA_FLOW_DISABLED  integration_service  data_flow_9522     
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_03] 2026-10-01T12:00:00Z [<=audit] CITED evidence/records/customer_account_handover_20261001.txt
+    L11: - 2026-10-01T12:00:00Z | account_service | account_4248 | USER_PROFILE | NOT_FOUND | novak.tomasz@icloud.com   <- ['novak.tomasz@icloud.com', 'account_4248']
+    L16: - 2026-10-01T12:00:00Z | analytics_platform | analytics_2034 | ANALYTICS_PROFILE | IDENTIFIABLE | novak.tomasz@icloud.com   <- ['analytics_2034', 'novak.tomasz@icloud.com']
+    L25: - 2026-10-01T12:00:00Z | integration_service | data_flow_9522 | DATA_FLOW | ACTIVE | novak.tomasz@icloud.com   <- ['data_flow_9522', 'novak.tomasz@icloud.com']
+    L26: - 2026-10-01T12:00:00Z | search_service | search_052 | SEARCH_INDEX_ENTRY | FOUND | novak.tomasz@icloud.com   <- ['search_052', 'novak.tomasz@icloud.com']
+    L40: - 2026-10-01T12:00:00Z | security_service | audit_record_9394 | SECURITY_AUDIT_LOG | FOUND | user_32   <- ['user_32', 'audit_record_9394']
+    L46: - 2026-10-01T12:00:00Z | support_platform | support_864 | SUPPORT_MESSAGE | IDENTIFIABLE | novak.tomasz@icloud.com   <- ['support_864', 'novak.tomasz@icloud.com']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3801  2026-09-12T11:04:43Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_4248 SUCCESS | Deletion worker submitted primary profile account_4248 to account_service.
+  activity_3814  2026-09-12T12:55:35Z [<=audit] DELETE_RECORD          deletion_worker->search_service search_052 FAILED | Deletion worker received the final result for search_052 from search_service.
+  activity_3815  2026-09-12T13:14:05Z [<=audit] REDACT_RECORD          deletion_worker->support_platform support_864 FAILED | Deletion worker received the final result for support_864 from support_platform.
+  activity_3816  2026-09-12T13:33:34Z [<=audit] ANONYMIZE_RECORD       deletion_worker->analytics_platform analytics_2034 FAILED | Deletion worker received the final result for analytics_2034 from analytics_platform.
+  activity_3817  2026-09-12T13:52:04Z [<=audit] CHECK_DATA_FLOW        deletion_worker->integration_service data_flow_9522 SUCCESS | Connector status check confirmed that data flow data_flow_9522 remains enabled.

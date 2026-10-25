@@ -1,0 +1,56 @@
+=== case_30  user=user_30  status=INCOMPLETE  reported=COMPLETE
+requested=2026-08-26T12:00:00Z reported=2026-08-27T12:00:00Z audit=2026-09-15T12:00:00Z
+text: I was told the account had been deleted, but I can still find traces in search, support, and analytics. Please handle them and disable any synchronization that could recreate them.
+identifiers: ['+33 6 57 32 62 06', '81310fd2f1e102930bc5f18c2d42a74786e74ce9e603fadcefe9caf8065081bc', 'b891c158feafa1949f0b023518725836228066adc1500488528cae6d799b3bef', 'camille.bernard86@outlook.com', 'camille.bernard@outlook.com', 'user_30']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    search_service       search_9359        evidence_92
+   2 FINDING      REPORT_EXPOSED_PII         analytics_platform   analytics_3697     evidence_92
+   3 FINDING      REPORT_EXPOSED_PII         support_platform     support_6477       evidence_92
+   4 FINDING      REPORT_ACTIVE_DATA_FLOW    integration_service  data_flow_8524     evidence_92
+   5 REMEDIATION  DISABLE_DATA_FLOW          integration_service  data_flow_8524     
+   6 REMEDIATION  DELETE_RECORD              search_service       search_9359        
+   7 REMEDIATION  REDACT_RECORD              support_platform     support_6477       
+   8 REMEDIATION  ANONYMIZE_RECORD           analytics_platform   analytics_3697     
+   9 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_4163       
+  10 VERIFICATION VERIFY_RECORD_ABSENT       search_service       search_9359        
+  11 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_1707  
+  12 VERIFICATION VERIFY_RECORD_REDACTED     support_platform     support_6477       
+  13 VERIFICATION VERIFY_RECORD_ANONYMIZED   analytics_platform   analytics_3697     
+  14 VERIFICATION VERIFY_DATA_FLOW_DISABLED  integration_service  data_flow_8524     
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_92] 2026-09-15T11:44:55Z [<=audit] CITED evidence/records/service_resource_export_20260915_114455.json
+    L65: "email": "camille.bernard86@outlook.com",   <- ['camille.bernard86@outlook.com']
+    L69: "resource_id": "analytics_3697"   <- ['analytics_3697']
+    L198: "customer_email": "camille.bernard86@outlook.com",   <- ['camille.bernard86@outlook.com']
+    L203: "resource_id": "data_flow_8524"   <- ['data_flow_8524']
+    L269: "email": "camille.bernard86@outlook.com",   <- ['camille.bernard86@outlook.com']
+    L272: "resource_id": "search_9359"   <- ['search_9359']
+    L278: "query": "camille.bernard86@outlook.com",   <- ['camille.bernard86@outlook.com']
+    L279: "resource_id": "search_9359"   <- ['search_9359']
+    L364: "requester_email": "camille.bernard86@outlook.com",   <- ['camille.bernard86@outlook.com']
+    L367: "resource_id": "support_6477"   <- ['support_6477']
+[evidence_02] 2026-09-17T12:00:00Z [>AUDIT]  evidence/records/customer_data_snapshot_bundle_20260917.json
+    L215: "resource_id": "analytics_3697",   <- ['analytics_3697']
+    L216: "user_id": "user_30",   <- ['user_30']
+    L217: "email": "camille.bernard@outlook.com",   <- ['camille.bernard@outlook.com']
+    L218: "phone": "+33 6 57 32 62 06",   <- ['+33 6 57 32 62 06']
+    L219: "email_hash": "81310fd2f1e102930bc5f18c2d42a74786e74ce9e603fadcefe9caf8065081bc",   <- ['81310fd2f1e102930bc5f18c2d42a74786e74ce9e603fadcefe9caf8065081bc']
+    L331: "resource_id": "data_flow_8524",   <- ['data_flow_8524']
+    L334: "subject_selector": "camille.bernard86@outlook.com",   <- ['camille.bernard86@outlook.com']
+    L382: "resource_id": "search_9359",   <- ['search_9359']
+    L386: "email": "camille.bernard86@outlook.com",   <- ['camille.bernard86@outlook.com']
+    L387: "customer_reference": "user_30"   <- ['user_30']
+    L461: "resource_id": "audit_record_1707",   <- ['audit_record_1707']
+    L462: "subject_reference": "user_30",   <- ['user_30']
+    L510: "resource_id": "support_6477",   <- ['support_6477']
+    L512: "subject_reference": "user_30",   <- ['user_30']
+    L514: "message_text": "Please send the delivery update to camille.bernard86@outlook.com. The affected order includes: Smart desk lamp."   <- ['camille.bernard86@outlook.com']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3465  2026-08-27T10:55:42Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_4163 SUCCESS | Deletion worker submitted primary profile account_4163 to account_service.
+  activity_3467  2026-08-27T12:41:34Z [<=audit] CHECK_DATA_FLOW        deletion_worker->integration_service data_flow_8524 SUCCESS | Connector status check confirmed that data flow data_flow_8524 remains enabled.
+  activity_3468  2026-08-27T13:00:04Z [<=audit] DELETE_RECORD          deletion_worker->search_service search_9359 FAILED | Deletion worker received the final result for search_9359 from search_service.
+  activity_3469  2026-08-27T13:19:33Z [<=audit] REDACT_RECORD          deletion_worker->support_platform support_6477 FAILED | Deletion worker received the final result for support_6477 from support_platform.
+  activity_3470  2026-08-27T13:38:03Z [<=audit] ANONYMIZE_RECORD       deletion_worker->analytics_platform analytics_3697 FAILED | Deletion worker received the final result for analytics_3697 from analytics_platform.

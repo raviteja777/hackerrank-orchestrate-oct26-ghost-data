@@ -1,0 +1,24 @@
+=== case_25  user=user_25  status=COMPLETE  reported=NOT_STARTED
+requested=2026-08-31T12:00:00Z reported=2026-09-02T12:00:00Z audit=2026-09-15T12:00:00Z
+text: The privacy page still says my request failed. Please inspect the actual systems and tell me whether the account and identifiable analytics data have already been removed.
+identifiers: ['+82 10 0616 2075', '+82 10 6662 4968', '52a8f91b84187990ccf1541e03bbbb440a2ad015384a9e0e35c5613f2d3a3785', 's.yoon04@gmail.com', 'user_25']
+
+--- ANSWER STEPS
+   1 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_3136       evidence_92
+   2 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_451   evidence_92
+   3 VERIFICATION VERIFY_RECORD_ANONYMIZED   analytics_platform   analytics_1895     evidence_92
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_92] 2026-09-15T11:44:55Z [<=audit] CITED evidence/records/service_resource_export_20260915_114455.json
+    L10: "resource_id": "account_3136",   <- ['account_3136']
+    L60: "resource_id": "analytics_1895"   <- ['analytics_1895']
+    L302: "resource_id": "audit_record_451",   <- ['audit_record_451']
+    L304: "subject_reference": "user_25"   <- ['user_25']
+[evidence_02] 2026-09-17T12:00:00Z [>AUDIT]  evidence/records/customer_data_snapshot_bundle_20260917.json
+    L83: "resource_id": "analytics_1895",   <- ['analytics_1895']
+    L426: "resource_id": "audit_record_451",   <- ['audit_record_451']
+    L427: "subject_reference": "user_25",   <- ['user_25']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3597  2026-09-02T10:48:27Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_3136 FAILED | Deletion worker submitted primary profile account_3136 to account_service.
+  activity_3602  2026-09-02T11:31:08Z [<=audit] ANONYMIZE_RECORD       deletion_worker->analytics_platform analytics_1895 SUCCESS | Policy action completed for analytics_1895.

@@ -1,0 +1,47 @@
+=== case_27  user=user_27  status=COMPLETE  reported=COMPLETE
+requested=2026-08-29T12:00:00Z reported=2026-08-30T12:00:00Z audit=2026-09-15T12:00:00Z
+text: Please audit the deletion as it stood when my request was reviewed. I want confirmation that the account was fully removed at that point.
+identifiers: ['+91 97441 66195', '2fe35cb075df5dbdaf7b1a68a8538956cae8cdfdf875ef2bdc5b5cee75f06510', 'ananya-nair@gmail.com', 'user_27']
+
+--- ANSWER STEPS
+   1 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_3866       evidence_92
+   2 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_3830  evidence_92
+   3 VERIFICATION VERIFY_RECORD_REDACTED     support_platform     support_4707       evidence_92
+   4 VERIFICATION VERIFY_RECORD_ANONYMIZED   analytics_platform   analytics_4574     evidence_92
+   5 VERIFICATION VERIFY_DATA_FLOW_DISABLED  integration_service  data_flow_2295     evidence_92
+   6 VERIFICATION VERIFY_RESTORE_BLOCKED     backup_service       backup_5970        evidence_92
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_92] 2026-09-15T11:44:55Z [<=audit] CITED evidence/records/service_resource_export_20260915_114455.json
+    L16: "resource_id": "account_3866",   <- ['account_3866']
+    L87: "resource_id": "analytics_4574"   <- ['analytics_4574']
+    L129: "archive_key": "archive/customer-data/backup_5970.tar.zst",   <- ['backup_5970']
+    L131: "customer_reference": "user_27",   <- ['user_27']
+    L133: "resource_id": "backup_5970",   <- ['backup_5970']
+    L163: "customer_reference": "user_27",   <- ['user_27']
+    L167: "resource_id": "data_flow_2295"   <- ['data_flow_2295']
+    L295: "resource_id": "audit_record_3830",   <- ['audit_record_3830']
+    L297: "subject_reference": "user_27"   <- ['user_27']
+    L334: "customer_reference": "user_27",   <- ['user_27']
+    L340: "resource_id": "support_4707"   <- ['support_4707']
+[evidence_02] 2026-09-17T12:00:00Z [>AUDIT]  evidence/records/customer_data_snapshot_bundle_20260917.json
+    L132: "resource_id": "analytics_4574",   <- ['analytics_4574']
+    L258: "resource_id": "backup_5970",   <- ['backup_5970']
+    L260: "subject_reference": "user_27",   <- ['user_27']
+    L307: "resource_id": "data_flow_2295",   <- ['data_flow_2295']
+    L310: "subject_selector": "user_27",   <- ['user_27']
+    L440: "resource_id": "audit_record_3830",   <- ['audit_record_3830']
+    L441: "subject_reference": "user_27",   <- ['user_27']
+    L489: "resource_id": "support_4707",   <- ['support_4707']
+    L491: "subject_reference": "user_27",   <- ['user_27']
+    L524: "resource_id": "account_3866",   <- ['account_3866']
+    L525: "customer_reference": "user_27",   <- ['user_27']
+    L527: "email": "ananya-nair@gmail.com",   <- ['ananya-nair@gmail.com']
+    L528: "phone": "+91 97441 66195",   <- ['+91 97441 66195']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3530  2026-08-30T10:57:28Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_3866 SUCCESS | Deletion worker submitted primary profile account_3866 to account_service.
+  activity_3533  2026-08-30T11:31:09Z [<=audit] ANONYMIZE_RECORD       deletion_worker->analytics_platform analytics_4574 SUCCESS | Policy action completed for analytics_4574.
+  activity_3536  2026-08-30T11:38:38Z [<=audit] REDACT_RECORD          deletion_worker->support_platform support_4707 SUCCESS | Policy action completed for support_4707.
+  activity_3537  2026-08-30T11:45:08Z [<=audit] DISABLE_DATA_FLOW      deletion_worker->integration_service data_flow_2295 SUCCESS | Policy action completed for data_flow_2295.
+  activity_3540  2026-08-30T11:52:37Z [<=audit] BLOCK_RESTORE          deletion_worker->backup_service backup_5970 SUCCESS | Policy action completed for backup_5970.

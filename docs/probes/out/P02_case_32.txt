@@ -1,0 +1,25 @@
+=== case_32  user=user_542  status=INCOMPLETE  reported=PARTIALLY_COMPLETE
+requested=2026-09-03T12:00:00Z reported=2026-09-06T12:00:00Z audit=2026-09-15T12:00:00Z
+text: The account itself is gone, but an internal deleted-account record still shows my personal details. Please keep only the reference needed for retained records and remove the rest.
+identifiers: ['+233 24 991 1328', '4f4b9c98a05a2dad20e52313cce7809d18c3da544754dcd46d728b0173174b26', 'addo.kofi@gmail.com', 'user_542']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_EXPOSED_PII         identity_service     tombstone_9178     evidence_51
+   2 REMEDIATION  REDACT_RECORD              identity_service     tombstone_9178     
+   3 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_8858       
+   4 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_7068  
+   5 VERIFICATION VERIFY_RECORD_REDACTED     identity_service     tombstone_9178     
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_51] 2026-09-15T12:00:00Z [<=audit] CITED evidence/records/customer_data_snapshot_bundle_20260915.json
+    L26: "resource_id": "tombstone_9178",   <- ['tombstone_9178']
+    L27: "subject_reference": "user_542",   <- ['user_542']
+    L29: "email": "addo.kofi@gmail.com",   <- ['addo.kofi@gmail.com']
+    L30: "phone": "+233 24 991 1328",   <- ['+233 24 991 1328']
+    L31: "email_hash": "4f4b9c98a05a2dad20e52313cce7809d18c3da544754dcd46d728b0173174b26",   <- ['4f4b9c98a05a2dad20e52313cce7809d18c3da544754dcd46d728b0173174b26']
+    L49: "resource_id": "audit_record_7068",   <- ['audit_record_7068']
+    L50: "subject_reference": "user_542",   <- ['user_542']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3685  2026-09-06T11:05:15Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_8858 PARTIAL | Deletion worker submitted primary profile account_8858 to account_service.
+  activity_3692  2026-09-06T13:00:07Z [<=audit] REDACT_RECORD          deletion_worker->identity_service tombstone_9178 FAILED | Deletion worker received the final result for tombstone_9178 from identity_service.

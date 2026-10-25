@@ -1,0 +1,28 @@
+=== case_22  user=user_51  status=INCOMPLETE  reported=COMPLETE
+requested=2026-08-31T10:00:00Z reported=2026-09-01T10:00:00Z audit=2026-09-21T10:00:00Z
+text: Please erase the account linked to this email address. Please apply the correct treatment to records covered by the request. Please send a confirmation after the process finishes.
+identifiers: ['+82 10 8943 9310', 'bbd5522cc42afd8c0bacf9b557d5e0e057c24e7b113936bd98c541e92583a0e7', 'seoyeon-han@gmail.com', 'user_51']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    search_service       search_8911        evidence_05
+   2 FINDING      REPORT_EXPOSED_PII         analytics_platform   analytics_4440     evidence_05
+   3 REMEDIATION  DELETE_RECORD              search_service       search_8911        
+   4 REMEDIATION  ANONYMIZE_RECORD           analytics_platform   analytics_4440     
+   5 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_4990       
+   6 VERIFICATION VERIFY_RECORD_ABSENT       search_service       search_8911        
+   7 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_3482  
+   8 VERIFICATION VERIFY_RECORD_ANONYMIZED   analytics_platform   analytics_4440     
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_05] 2026-09-21T10:00:00Z [<=audit] CITED evidence/databases/customer_data_read_replica_20260921.sql
+    L17: INSERT INTO "customer_data_primary" VALUES('analytics_4440','analytics_platform','customer_analytics_reports','{"resource_id":"analytics_4440","user_id":"user_51","email":"seoyeon-han@gmail.com","phone":"+82 10 8943 9310","email_hash":"bbd5522cc42afd8c0bacf9b5   <- ['bbd5522cc42afd8c0bacf9b557d5e0e057c24e7b113936bd98c541e92583a0e7', 'user_51', 'seoyeon-han@gmail.com', 'analytics_4440', '+82 10 8943 9310']
+    L21: INSERT INTO "customer_data_primary" VALUES('audit_record_3482','security_service','security_audit_events','{"resource_id":"audit_record_3482","subject_reference":"user_51","event_name":"account_deletion_reviewed","actor_type":"automated_privacy_workflow","inte   <- ['audit_record_3482', 'user_51']
+    L41: INSERT INTO "customer_data_primary" VALUES('search_8911','search_service','customer_search_documents','{"resource_id":"search_8911","index_name":"customer_directory_v3","document":{"display_name":"Seo-yeon Han","email":"seoyeon-han@gmail.com","customer_referen   <- ['search_8911', 'user_51', 'seoyeon-han@gmail.com']
+    L55: INSERT INTO "customer_data_read_replica" VALUES('analytics_4440','analytics_platform','customer_analytics_reports','{"resource_id":"analytics_4440","user_id":"user_51","email":"seoyeon-han@gmail.com","phone":"+82 10 8943 9310","email_hash":"bbd5522cc42afd8c0ba   <- ['bbd5522cc42afd8c0bacf9b557d5e0e057c24e7b113936bd98c541e92583a0e7', 'user_51', 'seoyeon-han@gmail.com', 'analytics_4440', '+82 10 8943 9310']
+    L59: INSERT INTO "customer_data_read_replica" VALUES('audit_record_3482','security_service','security_audit_events','{"resource_id":"audit_record_3482","subject_reference":"user_51","event_name":"account_deletion_reviewed","actor_type":"automated_privacy_workflow",   <- ['audit_record_3482', 'user_51']
+    L79: INSERT INTO "customer_data_read_replica" VALUES('search_8911','search_service','customer_search_documents','{"resource_id":"search_8911","index_name":"customer_directory_v3","document":{"display_name":"Seo-yeon Han","email":"seoyeon-han@gmail.com","customer_re   <- ['search_8911', 'user_51', 'seoyeon-han@gmail.com']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3573  2026-09-01T09:12:11Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_4990 SUCCESS | Deletion worker submitted primary profile account_4990 to account_service.
+  activity_3578  2026-09-01T10:50:03Z [<=audit] ANONYMIZE_RECORD       deletion_worker->analytics_platform analytics_4440 FAILED | Deletion worker received the final result for analytics_4440 from analytics_platform.
+  activity_3581  2026-09-01T11:09:32Z [<=audit] DELETE_RECORD          deletion_worker->search_service search_8911 FAILED | Deletion worker received the final result for search_8911 from search_service.

@@ -1,0 +1,146 @@
+co
+
+stomer Operations
+
+9 Search customers, orders, tickets.
+
+Production Help
+
+thstar Shop / Customer Operations / Customers
+
+Silver
+
+Filter
+
+aruka Sato
+
+r_11 - account_5762
+
+arview
+
+Orders
+
+Addresses
+
+Support history
+
+mail
+
+Phone
+
+Market
+
+Last contact
+
+Signup channel
+
+Preferred language
+
+aruka.s1838@zoho.com
+
++81 90 7610 2507
+
+mobile_app
+
+JP
+
+Japanese
+
+24 Sep 2026 09:14 JST
+
+a
+
+po
+
+-
+
+po
+
+po
+
+-
+
+verview
+
+Updated moments ago - 2 records
+
+Customer details
+
+rder ID
+
+Date
+
+Item
+
+Qty
+
+Total
+
+Status
+
+Default address
+
+2-18-4 Kichijoji, Musashino, Tokyo
+
+180-0004
+
+1
+
+Ceramic coffee set
+
+ORD-20265762
+
+12 Sep 2026
+
+JPY 8,900
+
+Delivered - 18 Sep
+
+Loyalty tier
+
+Silver
+
+2
+
+ORD-20265518
+
+28 Aug 2026
+
+Travel backpack
+
+JPY 12,400
+
+Returned - 03 Sep
+
+Support
+
+CS-8538 - support_9538
+
+Member since
+
+12 Jan 2024
+
+Activity
+
+e
+
+24 Sep
+
+Customer replied to CS-8538
+
+22 Sep
+
+Support agent responded
+
+18 Sep
+
+Order ORD-20265762 delivered
+
+03 Sep
+
+Order ORD-20265518 returned
+
+28 Aug
+
+support_9538 created
+

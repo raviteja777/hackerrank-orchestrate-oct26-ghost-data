@@ -1,0 +1,38 @@
+=== case_18  user=user_50  status=INCOMPLETE  reported=COMPLETE
+requested=2026-09-06T11:00:00Z reported=2026-09-09T11:00:00Z audit=2026-09-26T11:00:00Z
+text: I am asking you to remove my account and the personal information linked to it. Please review any identifiers connected to this account as part of the request. Please let me know once the request has been reviewed.
+identifiers: ['+81 90 2367 3149', '+81 90 6947 3342', '17813ce08076a05a5d763fa691e2df7f241b610f34b10a81f82544d06f74a4dd', 'mori.ren@gmail.com', 'user_50']
+
+--- ANSWER STEPS
+   1 FINDING      REPORT_REMAINING_RECORD    search_service       search_4013        evidence_94
+   2 FINDING      REPORT_EXPOSED_PII         analytics_platform   analytics_037      evidence_94
+   3 FINDING      REPORT_EXPOSED_PII         support_platform     support_5569       evidence_94
+   4 FINDING      REPORT_ACTIVE_DATA_FLOW    integration_service  data_flow_4890     evidence_94
+   5 REMEDIATION  DISABLE_DATA_FLOW          integration_service  data_flow_4890     
+   6 REMEDIATION  DELETE_RECORD              search_service       search_4013        
+   7 REMEDIATION  REDACT_RECORD              support_platform     support_5569       
+   8 REMEDIATION  ANONYMIZE_RECORD           analytics_platform   analytics_037      
+   9 VERIFICATION VERIFY_RECORD_ABSENT       account_service      account_5521       
+  10 VERIFICATION VERIFY_RECORD_ABSENT       search_service       search_4013        
+  11 VERIFICATION VERIFY_RECORD_PRESENT      security_service     audit_record_6645  
+  12 VERIFICATION VERIFY_RECORD_REDACTED     support_platform     support_5569       
+  13 VERIFICATION VERIFY_RECORD_ANONYMIZED   analytics_platform   analytics_037      
+  14 VERIFICATION VERIFY_DATA_FLOW_DISABLED  integration_service  data_flow_4890     
+
+--- EVIDENCE HITS (file_id captured_at [cut] cited? path)
+[evidence_94] 2026-09-26T10:38:56Z [<=audit] CITED evidence/logs/resource_lookup_trace_20260926_103856.log
+    L10: 2026-09-26T07:59:44Z level=DEBUG service=support_platform trace_id=rb-075944-005 event=support_ticket_read_started resource_id=support_5569 lookup_key=mori.ren@gmail.com   <- ['support_5569', 'mori.ren@gmail.com']
+    L11: 2026-09-26T07:59:44Z level=INFO service=support_platform trace_id=rb-075944-005 event=support_ticket_read_completed resource_id=support_5569 customer_reference=null requester_name=null requester_email=mori.ren@gmail.com requester_phone=null   <- ['support_5569', 'mori.ren@gmail.com']
+    L22: 2026-09-26T08:57:49Z level=DEBUG service=analytics_platform trace_id=rb-085749-011 event=analytics_profile_read_started resource_id=analytics_037 lookup_key=mori.ren@gmail.com   <- ['mori.ren@gmail.com', 'analytics_037']
+    L23: 2026-09-26T08:57:49Z level=INFO service=analytics_platform trace_id=rb-085749-011 event=analytics_profile_read_completed resource_id=analytics_037 customer_reference=null email=mori.ren@gmail.com phone=null email_hash=null audience_cohort=general_shopper   <- ['mori.ren@gmail.com', 'analytics_037']
+    L24: 2026-09-26T09:05:11Z level=DEBUG service=integration_service trace_id=rb-090511-012 event=connector_config_read_started resource_id=data_flow_4890 lookup_key=mori.ren@gmail.com   <- ['mori.ren@gmail.com', 'data_flow_4890']
+    L25: 2026-09-26T09:05:11Z level=INFO service=integration_service trace_id=rb-090511-012 event=connector_config_read_completed resource_id=data_flow_4890 enabled=true last_delivery_status=delivered connector_name=analytics_identity_bridge customer_email=mori.ren@gma   <- ['mori.ren@gmail.com', 'data_flow_4890']
+    L52: 2026-09-26T10:23:12Z level=DEBUG service=search_service trace_id=rb-102312-026 event=index_query_started resource_id=search_4013 lookup_key=mori.ren@gmail.com   <- ['search_4013', 'mori.ren@gmail.com']
+    L53: 2026-09-26T10:23:12Z level=INFO service=search_service trace_id=rb-102312-026 event=index_query_completed resource_id=search_4013 result=hit total_hits=1 index=customer_directory_v3 email=mori.ren@gmail.com customer_reference=null   <- ['search_4013', 'mori.ren@gmail.com']
+
+--- ACTIVITY (resource in answer, or identifier in details)
+  activity_3732  2026-09-09T09:52:26Z [<=audit] DELETE_RECORD          deletion_worker->account_service account_5521 SUCCESS | Deletion worker submitted primary profile account_5521 to account_service.
+  activity_3744  2026-09-09T11:43:18Z [<=audit] REDACT_RECORD          deletion_worker->support_platform support_5569 FAILED | Deletion worker received the final result for support_5569 from support_platform.
+  activity_3747  2026-09-09T12:02:47Z [<=audit] DELETE_RECORD          deletion_worker->search_service search_4013 FAILED | Deletion worker received the final result for search_4013 from search_service.
+  activity_3751  2026-09-09T12:21:17Z [<=audit] ANONYMIZE_RECORD       deletion_worker->analytics_platform analytics_037 FAILED | Deletion worker received the final result for analytics_037 from analytics_platform.
+  activity_3753  2026-09-09T12:40:46Z [<=audit] CHECK_DATA_FLOW        deletion_worker->integration_service data_flow_4890 SUCCESS | Connector status check confirmed that data flow data_flow_4890 remains enabled.
