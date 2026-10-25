@@ -34,7 +34,8 @@ After **every** session:
 - [ ] `log.txt` has the new entries with correct `tool=` / `model=` lines
 - [ ] `docs/OPEN_QUESTIONS.md` reviewed; OPEN items brought to the planning chat
 - [ ] `git commit` (small, descriptive)
-- [ ] `/export` the Claude Code session into `agent-trace/claude-code/`
+- [ ] `/export` the Claude Code session into `agent-trace/claude-code/` (folder not created yet as of 10:35; S1/S2 JSONL are still in `%USERPROFILE%\.claude\projects\`, so copy them at the end)
+- [ ] `git pull` to pick up organiser updates (AGENTS.md was already changed once; watch for a D1 / deadline answer)
 
 ## C. Final output checks (before submission)
 - [ ] `output.csv` at repo root: header `case_id,deletion_status,steps_json`, 518 rows, numeric input order (D1; re-check Discord answer)
@@ -52,7 +53,7 @@ After **every** session:
 - [ ] README "Solution" section: setup, run command, architecture, limitations (W-CEIL-01, D8 tie-breaks, 3b)
 - [ ] `log.txt` → **chat_transcript** upload
 - [ ] `agent-trace.zip`: `agent-trace/claude-code/` (session JSONL from `%USERPROFILE%\.claude\projects\` + `/export` files) and this planning chat (claude.ai Settings → Privacy → Export data, requested by ~15:30 so the email arrives in time); secrets checked
-- [ ] Submit at: https://wwww.hackerrank.com/contests/hackerrank-orchestrate-october26/challenges/ghost-data-still-exists
+- [ ] Submit at: https://www.hackerrank.com/contests/hackerrank-orchestrate-october26/challenges/ghost-data-still-exists (organisers fixed the `wwww` typo in AGENTS.md, commit 0eddbbd)
 
 ## E. AI interview prep (after submission)
 - [ ] One-page story: problem → linkage chain (SVG) → D8 tiers → evidence over claims → time travel (D3)

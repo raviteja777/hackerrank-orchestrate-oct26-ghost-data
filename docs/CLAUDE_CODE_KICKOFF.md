@@ -44,7 +44,7 @@ Screenshots (png) come in M5: for now register them as unparsed with a TODO. Rec
 Read docs/DESIGN.md §4.2, §8 and docs/SAMPLE_DEEP_DIVE.md §5–§6, plus docs/probes/P04, P13, P14. Log per AGENTS.md.
 Before coding, read docs/REVIEW_S1_S2.md and run `git status`; commit any uncommitted work first.
 Implement M3: edgelog.py (D7), runs.py (windows and phase chains), resolve.py (tiers 1, 2, 3, 3b; tiers 4 and 5 stubbed), each tier switchable in config.
-Acceptance: reproduce P13 (927 hard links) and P14 (eval accounts resolved >= 361/518; sample precision >= 38/39). Report the per-tier counts. Stop after M3.
+Acceptance: sample-side precision of case-resource assignment >= 38/39 (P14) and no regression on the M2 acceptance; eval accounts resolved >= 361/518 and hard links ≈ 927 (P13). The probes used their own simpler fact index, so counts within ±5% are fine. Explain any larger gap (e.g. M2 parses more formats → more hard links) instead of tuning to the number. Report the per-tier counts and the 3b ablation (tiers 1–3 vs 1–3+3b). Stop after M3.
 ```
 
 ## Session 4: M4 (state, policy, citations, steps, first scored output)
