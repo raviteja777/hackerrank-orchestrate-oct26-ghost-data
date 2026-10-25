@@ -1963,3 +1963,24 @@ repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
 worktree=main
 parent_agent=none
 
+
+## [2026-10-25T23:00:00+05:30] Session 7: EO-7 screenshot presence evidence, Phase 1
+
+User Prompt (verbatim, secrets redacted):
+## Session 7 (approved, time-boxed 60 min): EO-7 screenshot presence evidence
+(see docs/CLAUDE_CODE_KICKOFF.md Session 7 prompt: Step 0 baseline commit; implement PNG header/detail presence observation with explicit absence cues, evidence-only link for PNG-linked run resources, no guess for gate-failed images; report PDFs; Phase 1 on cached outputs with guardrails; fresh run by the user; wind-up afterwards)
+
+Agent Response Summary:
+Step 0 done (restored code/cache/.gitkeep, removed output_run1.csv and output_bkup.csv, commit "pre-EO-7 baseline", output_baseline.csv saved). Implemented EO-7 in image_parser.py (panel_presence), state.py (png present flag) and resolve.py (PNG evidence-only link). Phase 1: 22 model calls, all cache hits; --no-llm output byte-identical to the eo7_test output; sample metrics unchanged (32/32, F1 0.984, sequence-exact 26/32, citations 72/75); validator 0 issues; pytest 89 passed; output diff vs baseline = 5 cases (33, 34, 35, 52, 63), all in 33..63, all COMPLETE -> INCOMPLETE with findings from the screenshots. PDF relation report and the reason no eval row cites a PDF are in docs/OPEN_QUESTIONS.md EO-7. Stopped before the fresh run, as instructed.
+
+Actions:
+* Edited code/ghost/evidence/image_parser.py, code/ghost/state.py, code/ghost/resolve.py, code/tests/test_m5.py, docs/OPEN_QUESTIONS.md
+* Ran main.py --llm-profile final --run-label eo7_test, main.py --no-llm, evaluation/main.py --no-ablation --llm-profile final, pytest
+
+Context:
+tool=Claude Code
+model=claude-sonnet-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none

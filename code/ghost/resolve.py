@@ -320,10 +320,24 @@ def resolve(cases: list[Case], runs: RunIndex, edges: EdgeLog, flags: Flags, sto
 
     # ---- evidence-only resources (G-LNK-01, H-LNK-02) ---------------------------------------------------
     run_resources = runs.resources()
+    # EO-7: a screenshot header / detail panel that shows a catalog resource together with a validated identifier of a
+    # case's user links the resource to that case as evidence-only, also when the resource appears in a deletion_worker
+    # run, provided no run tier assigned it to another case.
+    png_links: dict[str, list[tuple[str, datetime]]] = defaultdict(list)
+    if store is not None:
+        for f in store.facts:
+            if f.fmt == "png" and f.resource_id and f.fields.get("region") in ("header", "detail") and f.fields.get("present") is not None:
+                for u in f.users():
+                    png_links[u].append((f.resource_id, f.fact_time))
     if flags.evidence_only_links:
         for c in cases:
             if not c.user_id:
                 continue
+            for rid, t in sorted(png_links.get(c.user_id, [])):
+                if rid in run_resources and t <= c.audit_at and catalog.entry_for(rid) and assigned.get(rid) in (None, c.case_id) \
+                        and rid not in res.assignments[c.case_id]:
+                    res.assignments[c.case_id][rid] = Assignment(rid, c.case_id, TIER_EVIDENCE)
+                    res.counts[TIER_EVIDENCE] += 1
             for rid, users in sorted(edges.linked_resources(c.audit_at).items()):
                 if c.user_id in users and rid not in run_resources and catalog.entry_for(rid):
                     res.assignments[c.case_id][rid] = Assignment(rid, c.case_id, TIER_EVIDENCE)

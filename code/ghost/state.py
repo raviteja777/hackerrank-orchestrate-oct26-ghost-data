@@ -73,7 +73,10 @@ def classify(f: Fact, spec: CategorySpec, subject_user: str | None = None) -> st
         or label in ("FOUND", "IDENTIFIABLE") or s.get("available") is True \
         or str(s.get("account_status") or "").upper() in ("ACTIVE", "DELETION_PENDING", "DELETED")
     # a stored row/object exists; a document naming the resource id (PDF attachment, register) shows it exists too
-    shown = f.fmt == "pdf" or (f.fmt == "png" and f.fields.get("region") == "detail")  # a document / detail panel shows it
+    panel = f.fmt == "png" and f.fields.get("region") in ("detail", "header") and f.fields.get("present") is not None
+    if panel and f.fields["present"] is False:
+        absent = True  # EO-7: explicit absence cue in the panel (not found / deleted / removed / expired / no records)
+    shown = f.fmt == "pdf" or (panel and f.fields["present"] is True)  # a document / header / detail panel shows it
     data_record = (f.fmt in ("sql", "json") or (shown and spec.kind in (KIND_RECORD, KIND_RETAIN))) and not absent
     kind = spec.kind
 

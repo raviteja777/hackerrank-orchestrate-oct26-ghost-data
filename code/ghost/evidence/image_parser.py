@@ -203,6 +203,20 @@ def signals_from_text(text: str) -> dict:
     return f
 
 
+# EO-7: explicit absence cues in a detail panel (the record is shown but gone / unavailable); anything else that names a
+# resource in the header or detail panel is a presence observation at the file's captured_at.
+_ABSENT_CUE = re.compile(r"\b(not found|deleted|removed|expired|no records)\b", re.I)
+
+
+def panel_presence(region: str, body: str) -> bool | None:
+    """True / False for a header or detail panel, None for other regions (table rows are mostly decoys, W-EVD-04)."""
+    if region == "detail":
+        return not _ABSENT_CUE.search(body)
+    if region == "header":
+        return True
+    return None
+
+
 _LOOKS_LIKE_ID = re.compile(r"\b[a-z]{2,15}_\d{2,6}\b", re.I)
 
 
@@ -327,12 +341,14 @@ def parse_image(f: EvidenceFile, path: Path, ctx: ImageContext | None = None, in
         ids = sorted(set(catalog.RESOURCE_ID_RE.findall(txt.lower())))
         sig = signals_from_text(body) if region == "detail" else {}
         base = {"region": region, "ocr_text": body, **sig}
+        present = panel_presence(region, body)
         if not ids:
             out.records.append(RawRecord(locator=f"{region}#{n}", fields=base, text=txt, line_span=None))
             n += 1
             return
         for rid in ids:
-            out.records.append(RawRecord(locator=f"{region}#{rid}", fields={**base, "resource_id": rid}, text=txt,
+            fields = {**base, "resource_id": rid, **({"present": present} if present is not None else {})}
+            out.records.append(RawRecord(locator=f"{region}#{rid}", fields=fields, text=txt,
                                          label_category=None, event="attachment_document" if "attachment" in txt.lower() else None))
     add("detail", texts.get("detail", ""), vis_ids)
     add("header", texts.get("header", ""), [])
