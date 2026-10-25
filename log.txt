@@ -1707,3 +1707,42 @@ repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
 worktree=main
 parent_agent=none
 
+
+## [2026-10-25T20:30:00+05:30] Session 6: M6 final run, reports, README, code.zip
+
+User Prompt (verbatim, secrets redacted):
+ok , open questions have been answered , you can check them
+and proceed to session 6
+
+## Session 6: M6 (final run, reports, packaging)
+Read AGENTS.md, docs/DESIGN.md §13, §14 (M6), §18, docs/DECISIONS.md (D12), docs/REVIEW_S3_S4.md, and README.md (packaging). Log per AGENTS.md.
+
+PART A: small fixes (local profile). Re-run the sample evaluation after EACH; status must stay 32/32 and F1 must not drop below 0.979. Report before/after numbers.
+ 1. D12: apply intent before resolution (NOT_APPLICABLE cases never compete for anchors); add tier 4b (audit-capture co-occurrence: an unassigned account mentioned in a file captured <= 24 h before exactly one remaining candidate's audit_at goes to that case); write the ambiguity queue to code/evaluation/ambiguity_queue.csv; run tier 5 most-constrained slot first, with propagation after each assignment; keep the stable secondary key resource_id.
+ 2. OQ-16 refinement: undecided after dropping flagged sentences -> rules on the full text, low confidence, logged; add that sentence to the injection custom case.
+ 3. git commit.
+
+PART B: final run. OQ-6 is closed: D1 numeric input order is final; output rows must follow the input row order exactly.
+ 4. python code/main.py --llm-profile final  (writes ./output.csv; the validator must pass). Run it a second time: output.csv must be byte-identical.
+ 5. Evaluation report code/evaluation/evaluation_report.md must explicitly contain: case-level status accuracy; step-level P/R/F1; field-level accuracy per field; sequence accuracy (exact + LCS); citation accuracy; ablations (G-STP-08 on/off, 3b on/off, tier 5 on/off, D12 before/after, intent rules vs LLM); per-tier counts and the ambiguity-queue summary (how many tier-5 low-confidence assignments); the >= 8 custom cases with results; "Failures found and improvements made" incl. the M4 RCA (docs/REVIEW_S3_S4.md §3) and OQ-10..16 outcomes; known limits (W-CEIL-01 ceiling, tier-5 guesses, 3b as a probable generator artifact). All metrics from the final-profile run.
+ 6. Usage report code/evaluation/usage_report.md from the usage ledger of THIS final run only: providers and model names; calls per model (cached calls flagged with original token counts); input and output tokens (incl. thinking tokens); total and average tokens per request (/518); estimated total and per-request cost per model and overall (prices in config.py, with the date and source).
+ 7. README.md "Solution" section: setup (Python, venv, requirements, Tesseract + TESSERACT_CMD, ANTHROPIC_API_KEY via env or .env, optional Ollama), run commands (local vs final profile), architecture summary (linkage chain, D8/D12 tiers, evidence-over-claims, time cut-off), outputs, limitations.
+ 8. Package: delete code/**/__pycache__, then build code.zip with the README command (README.md + code/; no dataset, no .venv, no nested archives, no .env). List the zip contents in the log and confirm no secret is inside (grep for "sk-ant").
+ 9. Final validator run, git commit, then stop.
+
+Agent Response Summary:
+Part A (local profile, sample evaluation after each step): baseline F1 0.979 / seq-exact 26/32 / status 32/32. D12 (intent before resolution, tier 4b, ambiguity queue CSV, most-constrained-first tie-break with propagation, stable resource_id key): F1 0.984, precision 1.000, citations 72/75, status 32/32 (case_21 account now correct via 4b). OQ-16 refinement (rules on the full text, low confidence, logged) plus the injection sentence in the custom case: metrics unchanged. Committed. Part B: final-profile run 1 (label final_run_1): validator passed, 170 COMPLETE / 338 INCOMPLETE / 10 NOT_APPLICABLE, 12 cases without an account step; 22 model calls (20 haiku-5-5 intent batches fresh, 2 sonnet-5-5 vision calls cached from the smoke run), 51,141 input / 26,584 output tokens, about USD 0.040 at original counts (0.017 billed in this run). Run 2 (final_run_2_repro) is byte-identical (md5 388b69a4d45eed298505cc71d7ed229b). Evaluation report regenerated from the final profile with the required sections and ablations (tier 5 off: 64 eval cases without an account vs 12; 3b off: F1 0.947), usage_report.md generated from the final_run_1 ledger, README Solution section added. code.zip built (README.md + code/, 121 files, 189 KB), no secret-like text inside, and the extracted zip reproduces output.csv byte-for-byte offline from the committed cache. pytest 87 passed.
+
+Actions:
+* Edited code/ghost/{resolve,pipeline,intent,config}.py, code/main.py (--run-label, ambiguity queue), code/evaluation/{main,custom_cases}.py, tests
+* Created code/evaluation/usage_report.py, usage_report.md, ambiguity_queue.csv; rewrote evaluation_report.md; added README.md Solution section
+* Ran main.py --llm-profile final twice, evaluation/main.py --write-report --llm-profile final, pytest, built code.zip with Python zipfile (equivalent to the README zip command; forward-slash entries, excludes __pycache__, .pytest_cache, .venv, .git)
+* code.zip contents (121 files): README.md; code/main.py; code/requirements.txt; code/ghost/{__init__,catalog,citations,config,edgelog,explain,facts,identity,intent,llm,llm_profiles,loaders,pipeline,policy,resolve,runs,state,steps,tier4,untrusted,validate}.py; code/ghost/evidence/{__init__,image_parser,json_parser,log_parser,normalize,pdf_parser,sql_parser,txt_parser}.py; code/evaluation/{main,custom_cases,usage_report}.py + evaluation_report.md + usage_report.md + ambiguity_queue.csv; code/scripts/{__init__,m2_acceptance,m3_acceptance,m5_intent_check,m5_screenshots,repro_p12}.py; code/tests/{conftest,test_evidence,test_identity,test_m4,test_m5,test_resolve,test_steps,test_validate}.py; code/cache/{.gitkeep,usage_ledger.jsonl}, code/cache/images/ (11 OCR caches), code/cache/llm/ (56 cached model answers). No dataset/, .venv, .env or nested archives. Secret scan (sk-ant, ANTHROPIC_API_KEY=value) over every entry: no hits.
+
+Context:
+tool=Claude Code
+model=claude-sonnet-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none

@@ -130,6 +130,68 @@ def run_variant(dataset_dir: Path, flags: config.Flags, sample_reqs, expected, l
     return evaluate(results, expected), results
 
 
+def full_dataset_blocks(d: Path, profile: str | None) -> list[str]:
+    """Generated report blocks that need the whole dataset: per-tier counts, ambiguity queue, intent, custom cases."""
+    from collections import Counter
+
+    import custom_cases
+    from ghost import untrusted
+    from ghost.intent import IntentGate
+    from ghost.llm import LLMClient
+    from ghost.resolve import write_ambiguity_queue
+
+    ev = loaders.load_requests(d)
+    sm = loaders.load_requests(d, "sample_deletion_requests.csv")
+    ctx = build_context(d, config.Flags(), llm_profile=profile, run_label="evaluation_full")
+    results = solve_all(ctx, ev)
+    write_ambiguity_queue(ctx.resolution.queue, Path(__file__).resolve().parent / "ambiguity_queue.csv")
+    c = ctx.resolution.counts
+    names = {"1": "1 hard identifier link", "1s": "1s window naked single", "3": "3 elimination", "3b": "3b timing-phase chain",
+             "4": "4 LLM residual", "4b": "4b audit-capture co-occurrence", "5": "5 deterministic tie-break (low confidence)",
+             "ev": "evidence-only link (audit records, attachments, copies)"}
+    out = ["## Full-dataset resolution (518 eval + 32 sample cases)", "", "| Tier | Resources assigned |", "|---|---|"]
+    out += [f"| {names[k]} | {c.get(k, 0)} |" for k in names]
+    out += [f"| excluded by a contrary link (OQ-10) | {c.get('foreign_excluded', 0)} |",
+            f"| window singles rejected by H-STP-05 | {c.get('single_rejected_h_stp_05', 0)} |", "",
+            f"Output over the 518 eval requests: {dict(Counter(r.status for r in results))}; "
+            f"cases without an account step: {sum(1 for r in results if r.status != 'NOT_APPLICABLE' and not any(s.resource_id.startswith('account_') for s in r.steps))}; "
+            f"low-confidence cases (any 3b / 4 / 5 attribution or fallback): {sum(r.low_confidence for r in results)}.", ""]
+    t5 = [(cid, rid) for cid, a in ctx.resolution.assignments.items() for rid, x in a.items() if x.tier == "5"]
+    shapes = Counter(q["shape"] for q in ctx.resolution.queue if q["kind"] == "account_slot")
+    out += ["### Ambiguity queue (D12; `code/evaluation/ambiguity_queue.csv`)", "",
+            f"* slots with account-less cases after every evidence tier: {sum(shapes.values())} (shapes cases-v-anchors: "
+            f"{', '.join(f'{k} x{v}' for k, v in sorted(shapes.items()))})",
+            f"* tier-5 low-confidence resource assignments: {len(t5)} over {len({cid for cid, _ in t5})} cases "
+            f"(accounts {sum(1 for _, r in t5 if r.startswith('account_'))}, chain members {sum(1 for _, r in t5 if not r.startswith('account_'))})",
+            f"* parked optional resources not emitted: {sum(1 for q in ctx.resolution.queue if q['kind'] == 'optional_resource')}", ""]
+
+    gate_rules = IntentGate(None).classify_all([r.request_text for r in ev + sm])
+    llm = LLMClient(profile, run_label="evaluation_intent") if profile else None
+    gate_llm = IntentGate(llm).classify_all([r.request_text for r in ev + sm])
+
+    def acc(gate):
+        wrong = [r.case_id for r in ev if gate[r.request_text].authorizes_deletion != (not 533 <= int(r.case_id.split("_")[1]) <= 542)]
+        wrong += [r.case_id for r in sm if not gate[r.request_text].authorizes_deletion]
+        return len(ev) + len(sm) - len(wrong), len(ev) + len(sm), wrong
+
+    r_ok, r_n, r_w = acc(gate_rules)
+    l_ok, l_n, l_w = acc(gate_llm)
+    out += ["## Intent (550 requests, 398 distinct texts)", "", "| Classifier | Correct | Wrong |", "|---|---|---|",
+            f"| multilingual rules only | {r_ok}/{r_n} | {r_w} |", f"| rules + LLM cascade (profile `{profile}`) | {l_ok}/{l_n} | {l_w} |", "",
+            f"Non-deletion requests detected: {sum(1 for r in ev if not gate_llm[r.request_text].authorizes_deletion)}/10; samples classified as deletion: "
+            f"{sum(gate_llm[r.request_text].authorizes_deletion for r in sm)}/32. LLM vs rules disagreements: "
+            f"{sum(1 for x in gate_llm.values() if x.llm is not None and x.rules is not None and x.llm != x.rules)}; escalated: "
+            f"{sum(x.escalated for x in gate_llm.values())}; rules undecided (default deletion): {sum(x.rules is None for x in gate_llm.values())}; "
+            f"suspicious-input flags: {sum(x.suspicious for x in gate_llm.values())}; low-confidence intents: {sum(x.low_confidence for x in gate_llm.values())}.", ""]
+
+    cres = custom_cases.run_all(llm)
+    out += ["## Custom evaluation cases (`code/evaluation/custom_cases.py`)", "", "| Case | Result | Rationale |", "|---|---|---|"]
+    out += [f"| {cc.name} | {'PASS' if ok else 'FAIL'} | {cc.rationale} |" for cc, _, ok in cres]
+    out += ["", f"{sum(ok for *_, ok in cres)}/{len(cres)} custom cases pass. Instruction-like texts flagged during this report: {untrusted.STATS.get('flagged', 0)} "
+            "(the injection case only; none of the 550 requests is flagged).", ""]
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--samples", action="store_true", default=True)
@@ -141,20 +203,23 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--smoke", action="store_true", help="single default variant, usage summary of this run (final-profile smoke test)")
     args = ap.parse_args(argv)
     d = config.DATASET_DIR
+    profile = None if args.no_llm else config.get_llm_profile(args.llm_profile)
     sample_reqs = loaders.load_requests(d, "sample_deletion_requests.csv")
     expected = load_expected(d)
     base = config.Flags()
-    variants = [("default (G-STP-08 on, tiers 1-3b)", base)]
+    variants = [("default (G-STP-08 on, tiers 1-5, D12 on, LLM intent)", base, True)]
     if not args.no_ablation and not args.smoke:
         variants += [
-            ("G-STP-08 off (`require_observation_to_emit=False`)", dataclasses.replace(base, require_observation_to_emit=False)),
-            ("tiers 1-3 (no 3b)", dataclasses.replace(base, tier_chains=False)),
-            ("tier 1 only", dataclasses.replace(base, tier_eliminate=False, tier_chains=False)),
+            ("G-STP-08 off (`require_observation_to_emit=False`)", dataclasses.replace(base, require_observation_to_emit=False), True),
+            ("3b off (tiers 1-3, then 4b / 5)", dataclasses.replace(base, tier_chains=False), True),
+            ("tier 5 off (no tie-break)", dataclasses.replace(base, tier_tiebreak=False), True),
+            ("D12 off (intent after resolution, no 4b, slot order)", dataclasses.replace(base, d12_refinements=False), True),
+            ("tiers 1 only (no 3, 3b; 4b / 5 still on)", dataclasses.replace(base, tier_eliminate=False, tier_chains=False), True),
+            ("intent rules only, no LLM at all (no vision either)", base, False),
         ]
     rows, main_res = [], None
-    for label, fl in variants:
-        r, res = run_variant(d, fl, sample_reqs, expected, None if args.no_llm else config.get_llm_profile(args.llm_profile),
-                             "smoke" if args.smoke else "evaluation")
+    for label, fl, use_llm in variants:
+        r, res = run_variant(d, fl, sample_reqs, expected, profile if use_llm else None, "smoke" if args.smoke else "evaluation")
         rows.append(fmt_metrics(label, r))
         print(f"[{label}] status {r['status_ok']}/{r['cases']}  step P/R/F1 {r['precision']:.3f}/{r['recall']:.3f}/{r['f1']:.3f}  "
               f"sequence-exact {r['seq_exact']}/{r['cases']}  LCS {r['lcs']:.3f}  citations {r['cite_ok']}/{r['cite_exp']}")
@@ -163,16 +228,21 @@ def main(argv: list[str] | None = None) -> int:
     r, res = main_res
     if args.smoke:
         from ghost.llm import read_ledger, summarize
-        rows = [x for x in read_ledger() if x.get("run") == "smoke" and x["profile"] == config.get_llm_profile(args.llm_profile)]
-        print("smoke usage:", json.dumps(summarize(rows), indent=1))
+        led = [x for x in read_ledger() if x.get("run") == "smoke" and x["profile"] == config.get_llm_profile(args.llm_profile)]
+        print("smoke usage:", json.dumps(summarize(led), indent=1))
     diffs = diff_lines(res, expected)
     if args.diff:
         print("\n".join(diffs))
     if args.write_report:
-        block = [BEGIN, "", "## Sample metrics (32 cases, `dataset/sample_output.csv`)", "",
+        block = [BEGIN, "", f"_Generated by `python code/evaluation/main.py --write-report --llm-profile {profile or 'none'}`; profile: **{profile}**._", "",
+                 "## Sample metrics (32 cases, `dataset/sample_output.csv`)", "",
+                 "Columns: case-level status accuracy | step-level precision / recall / F1 (multiset of full 7-field steps) | sequence-exact "
+                 "(array equality) | normalised LCS ratio | citation accuracy (evidence_id of the aligned expected cited steps) | field-level accuracy per field "
+                 "(steps aligned by phase, operation, system_id, resource_id).", "",
                  "| Variant | Status | Step P / R / F1 | Sequence-exact | LCS ratio | Citations | Field accuracy |",
                  "|---|---|---|---|---|---|---|", *rows, "",
                  f"Aligned steps (default): {r['aligned']}/{r['exp_steps']}; TP {r['tp']}, FP {r['fp']}, FN {r['fn']}.", "",
+                 *full_dataset_blocks(d, profile),
                  "### Sample mismatches (default variant, generated)", "", "```", *diffs, "```", "", END]
         text = REPORT.read_text(encoding="utf-8") if REPORT.exists() else "# Evaluation report\n\n" + BEGIN + "\n" + END + "\n"
         if BEGIN in text and END in text:
