@@ -41,6 +41,10 @@ class Flags:
     tier_chains: bool = True  # tier 3b, W-LNK-05
     tier_llm: bool = True
     tier_tiebreak: bool = True
+    exclude_foreign_links: bool = True  # OQ-10: a validated link to another user excludes the case
+    evidence_only_links: bool = True  # G-LNK-01: audit records, attachments and copies found only in evidence
+    chain_policy_band: tuple = (9, 11)  # W-LNK-05, seconds mod 30
+    chain_final_band: tuple = (20, 22)
     # Open-question defaults (DESIGN §7.2, §16).
     analytics_contact_delete: bool = True  # W-POL-01
     object_as_attachment: bool = True  # OQ-1

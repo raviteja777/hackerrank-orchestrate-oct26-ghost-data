@@ -49,3 +49,20 @@ Used by Claude Code during the build (DESIGN.md §15.1). The user takes each ope
 - Default implemented now: as described; PNG files are registered as unparsed with a TODO(M5) reason.
 - Impact if wrong: none for M2.
 - Status: ANSWERED (2026-10-25 planning chat): accepted. DESIGN §5 updated: seven log layouts, scope-only SQL snapshots, `operational_record_history` store aliases, trace-less record_lookup lines.
+
+### OQ-10: exclusion of a case by a contrary identifier link (new rule, M3)
+- Raised by / when: Claude Code, claude-sonnet-5-5, 2026-10-25 (M3)
+- Context: with P13 logic as written, run events inside a single-case window were assigned to that case even when evidence linked their resource to another person (case_11: account_146 and analytics_9447 sit in the run window but the handover file ties account_146 to a different user; case_12: two accounts and two searches under one case, which violates H-STP-05). Sample precision was 78/84.
+- Question: may a validated link from a resource to another user (link time <= the case's audit_at) remove that case from the resource's candidates? It follows from H-IDN-04 / H-IDN-03 (identifiers are exact, one owner) but is not in DESIGN §8.3 as written.
+- Options: (a) exclude (b) keep P13 behaviour
+- Default implemented now: (a), flag `exclude_foreign_links=True` (config.Flags). 17 resources excluded. Sample precision 79/80 with it; 78/84 without.
+- Impact if wrong: some run resources linked to a second user would be dropped from a case; none seen in the samples.
+- Status: OPEN
+
+### OQ-11: M3 numbers vs the probes, band sensitivity, evidence-only noise (informational)
+- Raised by / when: Claude Code, claude-sonnet-5-5, 2026-10-25 (M3)
+- Context: (1) Tier 1 gives 1,032 hard links vs P13's 927 (+11%). 83 of them rest on facts from the bracket / pipe / syslog log layouts, which the probe's `trace_id` regex could not group; without those it is 949 (+2%). (2) Eval accounts resolved: 447/518 with the DESIGN §8.2 bands (9-11 s / 20-22 s), 396/518 with the P14 bands (8-12 / 19-23); P14 reported 361. Sample precision is the same either way (79/80 vs 77/78). The wider band makes more follow-ups match several anchors, so they are parked. (3) Evidence-only links (479 resources) add noise on samples: case_07 gets object_19 (not in the answer; OQ-1), case_17 gets tombstone_17 (not in the answer). Policy (M4) decides what produces a step. (4) One residual wrong naked single: case_11 analytics_9447 (an all-null analytics record from another run in the window).
+- Question: none blocking. 3b remains a probable generator artifact (W-LNK-05); it is switchable (`tier_chains`) and the ablation is reported.
+- Default implemented now: DESIGN bands (config `chain_policy_band`, `chain_final_band`).
+- Impact if wrong: eval account assignment (tier 3b) could be less reliable than the sample precision suggests, because only 4 sample cases are unresolved and the true pairs were used to derive the bands.
+- Status: OPEN (informational)
