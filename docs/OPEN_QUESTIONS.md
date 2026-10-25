@@ -118,7 +118,15 @@ Raised by Claude Code (claude-sonnet-5-5) at the end of M6, at the user's reques
 - Numbers: 3b off -> sample F1 0.984 -> 0.947, sequence-exact 26 -> 22, and tier 5 would have to guess 269 resources instead of 76. Tier 5 off -> eval cases without an account step 12 -> 64 (samples unchanged).
 - Question: ship with 3b (and tier 5) on, or switch either off (`tier_chains`, `tier_tiebreak` in `config.Flags`)? The interview answer should state that 3b is an artifact-based heuristic, switchable, reported in the ablation.
 - Default implemented now: both on, every such assignment low confidence.
-- Status: OPEN
+- Planning-chat due diligence (2026-10-25, probe docs/probes/P15_shortcut_diligence.py). Reading of the clause: a case-family shortcut recognises a group of cases (id range, request template, file naming, labels) and emits a pre-decided answer instead of deriving it from evidence. Tests applied:
+  1. Labels: nothing in code/ghost reads sample_output.csv; no case or resource id literals in the pipeline. Pass for both tiers.
+  2. Family keying: 3b uses no case id at all; tier 5 uses the case number only as a deterministic order key. Pass.
+  3. Grounding: 3b links an event to a run anchor through system_activity timestamps, an allowed operation ("match evidence through ... timestamps"); the anchor still needs a case from tiers 1-4b/5. Pass.
+  4. Out-of-sample: in eval-only single-anchor slots every run event fits the bands: policy 23/23; finals 72/133 for the slot's own anchor and the other 61/61 for a neighbouring slot's anchor (0 unexplained). The phase law is a property of the activity stream, not of the 32 sample labels. Pass.
+  5. Fail-safe: 3b attaches only on a unique band match; 120 of 460 anchor pairs that share a slot collide in phase and are parked, not guessed.
+  6. Tier 5 carries no hidden signal: on 186 high-confidence account pairs that share a slot, case-number order equals anchor-time order 88 times (47%), i.e. none. Its 54 pairings (22 2v2, 2 3v3, 2 2v3) are expected about 47% right, roughly break-even for step F1, and switching it off changes 0 of 518 statuses. It keeps H-STP-02 (one account step per case).
+- Recommendation: ship both on (no code change; consistent with D8/D12). Optional hardening against an unseen dataset with another cadence: enable 3b only when its phase law holds at run time on single-anchor slots (>= 95% in band), otherwise fall back to tiers 4b/5; this dataset gives 100%, so output.csv must stay byte-identical.
+- Status: ANSWERED (planning chat): keep both on; hardening guard is the user's call.
 
 ### EO-2: sample metrics are optimistic (no held-out labels)
 - F1 0.984 / sequence-exact 26/32 / status 32/32 come from the 32 samples that shaped the rules and the 3b bands. The eval set is far more ambiguous (12 cases with no account step, 76 tier-5 guesses at about chance), so a lower score there is expected. Already stated under "Known limits" in `code/evaluation/evaluation_report.md`.

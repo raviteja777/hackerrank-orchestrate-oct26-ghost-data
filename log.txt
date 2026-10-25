@@ -1766,3 +1766,25 @@ branch=main
 repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
 worktree=main
 parent_agent=none
+## [2026-10-25T14:29:00+05:30] Due diligence: case-family shortcuts clause vs tier 3b and tier 5 (EO-1)
+
+User Prompt (verbatim, secrets redacted):
+session 6 is done 
+i have asked claude code to log observations - they are in open questions 
+do a due diligence on case family shortcuts clause for 3b and 5
+
+Agent Response Summary:
+Checked the clause (problem statement 6.7, AGENTS.md) against both tiers with label-free tests on the eval data. No label reads or id literals in the pipeline. 3b phase law holds out of sample: every run event in eval-only single-anchor slots fits the bands (policy 23/23, finals 133/133 counting 61 that belong to a neighbouring slot's anchor). Tier 5 uses case-number order only as a tie-break and that order carries no signal (88/186 = 47%); its 54 pairings are about break-even for F1 and change 0/518 statuses. Recommended keeping both on; offered an optional runtime guard for 3b (enable only if the phase law holds on single-anchor slots) for unseen datasets. EO-1 updated.
+
+Actions:
+* Ran read-only probes on the repo data (phase law, order back-test, tier-5 status ablation, rules-only profile)
+* Saved docs/probes/P15_shortcut_diligence.py; edited docs/OPEN_QUESTIONS.md (EO-1)
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
