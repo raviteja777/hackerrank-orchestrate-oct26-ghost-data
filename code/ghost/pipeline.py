@@ -77,16 +77,20 @@ def build_context(dataset_dir: Path | None = None, flags: config.Flags | None = 
     reqs = loaders.load_requests(d)
     samples = loaders.load_requests(d, "sample_deletion_requests.csv")
     cases = make_cases(index, reqs, samples)
+    gate = IntentGate(llm)
+    gate.classify_all(intent_texts if intent_texts is not None else [r.request_text for r in reqs + samples])
+    text_of = {r.case_id: r.request_text for r in reqs + samples}
+    # D12 (a): intent is applied BEFORE resolution, so NOT_APPLICABLE cases never compete for anchors
+    in_play = [c for c in cases if not flags.d12_refinements or text_of[c.case_id] not in gate.results
+               or gate.results[text_of[c.case_id]].authorizes_deletion]
     slots: dict[datetime, list[str]] = defaultdict(list)
-    for c in cases:
+    for c in in_play:
         slots[c.reported_at].append(c.case_id)
     edges = EdgeLog.build(index, store, activity)
     runs = RunIndex(run_events(activity), dict(slots), flags.chain_policy_band, flags.chain_final_band)
     by_id = {c.case_id: c for c in cases}
     decider = make_decider(llm, index, lambda cid: by_id[cid].user_id) if llm else None
-    resolution = resolve(cases, runs, edges, flags, store, decider)
-    gate = IntentGate(llm)
-    gate.classify_all(intent_texts if intent_texts is not None else [r.request_text for r in reqs + samples])
+    resolution = resolve(in_play, runs, edges, flags, store, decider)
     ev: dict[str, list] = defaultdict(list)
     for e in runs.events:
         ev[e.resource_id].append(e)

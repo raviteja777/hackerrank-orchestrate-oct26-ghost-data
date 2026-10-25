@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from . import catalog
 from .config import Flags
@@ -27,7 +27,7 @@ from .loaders import DeletionRequest
 from .runs import RunIndex
 
 TIER_HARD, TIER_SINGLE, TIER_ELIM, TIER_CHAIN, TIER_EVIDENCE = "1", "1s", "3", "3b", "ev"
-TIER_LLM, TIER_TIEBREAK = "4", "5"
+TIER_LLM, TIER_TIEBREAK, TIER_COOC = "4", "5", "4b"
 LOW_CONFIDENCE_TIERS = {TIER_CHAIN, TIER_LLM, TIER_TIEBREAK}  # OQ-11 (2): reported as low confidence
 
 
@@ -54,6 +54,7 @@ class Resolution:
     counts: Counter = field(default_factory=Counter)  # resources assigned per tier
     event_counts: Counter = field(default_factory=Counter)  # run events covered per tier
     notes: list[str] = field(default_factory=list)
+    queue: list[dict] = field(default_factory=list)  # ambiguity queue rows (D12)
 
     def resources_of(self, case_id: str, include_evidence: bool = True) -> dict[str, Assignment]:
         a = self.assignments.get(case_id, {})
@@ -227,29 +228,88 @@ def resolve(cases: list[Case], runs: RunIndex, edges: EdgeLog, flags: Flags, sto
         if flags.tier_eliminate:
             eliminate(TIER_ELIM)
 
-    # ---- tier 5: deterministic tie-break (DESIGN §8.3 step 6) -------------------------------------------------
-    # No ordering signal links cases and anchors (P04), so within a slot the remaining anchors, sorted by event
-    # time, are paired with the remaining account-less cases, sorted numerically by case id. Low confidence.
-    # Optional types left unresolved are NOT emitted; only accounts are always emitted (H-STP-02).
-    if flags.tier_tiebreak:
-        def anchor_time(a: str):
-            evs = events_of[a]
-            return min([e.t for e in evs if e.kind == "anchor"] or [e.t for e in evs])
+    # ---- tier 4b: audit-capture co-occurrence (D12) ---------------------------------------------------------------
+    # An unassigned account mentioned in a file captured <= 24 h before exactly ONE remaining candidate's audit_at
+    # goes to that case (G-EVD-06: the audit-capture file is the case's own capture).
+    chain_of: dict[str, list[str]] = {}
+    for slot in runs.slots:
+        for anchor, members in runs.chains(slot)[0].items():
+            chain_of.setdefault(anchor, members)
 
-        for slot in sorted(runs.slots):
-            chains, _ = runs.chains(slot)
-            free = sorted((c for c in runs.slots[slot] if not res.case_has_account(c)), key=_case_num)
-            anchors = sorted((a for a in chains if a not in assigned and a in cand and cand[a] & set(free)),
-                             key=lambda a: (anchor_time(a), a))
-            for a, cid in zip(anchors, free):
-                if cid not in cand.get(a, ()):
+    def assign_chain(a: str, cid: str, tier: str) -> None:
+        assign(a, cid, tier)
+        for m in chain_of.get(a, []):  # the chain carries its members (3b)
+            if m not in assigned and cid in cand.get(m, ()):
+                assign(m, cid, tier)
+
+    if flags.d12_refinements and flags.tier_4b and store is not None:
+        window = timedelta(hours=24)
+        for rid in sorted(cand):
+            if rid in assigned or not rid.startswith("account_"):
+                continue
+            files = {f.file_id: f.file_captured_at for f in store.for_resource(rid)}
+            hits = [cid for cid in sorted(cand[rid]) if not res.case_has_account(cid)
+                    and any(by_id[cid].audit_at - window <= t <= by_id[cid].audit_at for t in files.values())]
+            if len(hits) == 1:
+                assign_chain(rid, hits[0], TIER_COOC)
+        if flags.tier_eliminate:
+            eliminate(TIER_ELIM)
+
+    # ---- ambiguity queue (D12): what is left after every evidence-based tier --------------------------------------
+    def anchor_time(a: str):
+        evs = events_of[a]
+        return min([e.t for e in evs if e.kind == "anchor"] or [e.t for e in evs])
+
+    def slot_state(slot):
+        free = sorted((c for c in runs.slots[slot] if not res.case_has_account(c)), key=_case_num)
+        chains, _ = runs.chains(slot)
+        anchors = sorted((a for a in chains if a not in assigned and a in cand and cand[a] & set(free)),
+                         key=lambda a: (anchor_time(a), a))
+        return free, anchors
+
+    queue: dict[datetime, dict] = {}
+    for slot in sorted(runs.slots):
+        free, anchors = slot_state(slot)
+        if free:
+            queue[slot] = {"kind": "account_slot", "slot": slot.isoformat(), "cases": " ".join(free),
+                           "anchors": " ".join(anchors), "shape": f"{len(free)}v{len(anchors)}",
+                           "outcome": "unresolved (no anchor left)" if not anchors else ""}
+    res.queue = [queue[k] for k in sorted(queue)]
+    res.counts["queue_slots"] = len(queue)
+
+    # ---- tier 5: deterministic tie-break (DESIGN §8.3 step 6, D12) --------------------------------------------
+    # No ordering signal links cases and anchors (P04), so within a slot the remaining anchors, sorted by event
+    # time (stable secondary key: resource id), are paired with the remaining account-less cases, sorted
+    # numerically by case id. D12: most-constrained slot first, constraint propagation after each assignment.
+    # Low confidence. Optional types left unresolved are NOT emitted; only accounts are always emitted (H-STP-02).
+    if flags.tier_tiebreak:
+        done: set[datetime] = set()
+        while True:
+            options = []
+            for slot in sorted(runs.slots):
+                if slot in done:
                     continue
-                assign(a, cid, TIER_TIEBREAK)
-                for m in chains[a]:  # the chain carries its members (3b)
-                    if m not in assigned and cid in cand.get(m, ()):
-                        assign(m, cid, TIER_TIEBREAK)
+                free, anchors = slot_state(slot)
+                if free and anchors:
+                    options.append((len(free) * len(anchors) if flags.d12_refinements else 0, slot, free, anchors))
+            if not options:
+                break
+            _, slot, free, anchors = (min(options, key=lambda o: (o[0], o[1])) if flags.d12_refinements else options[0])
+            done.add(slot)
+            pairs = []
+            for a, cid in zip(anchors, free):
+                if cid in cand.get(a, ()) and a not in assigned and not res.case_has_account(cid):
+                    assign_chain(a, cid, TIER_TIEBREAK)
+                    pairs.append(f"{cid}={a}")
+            if slot in queue:
+                queue[slot]["outcome"] = ("tier 5: " + " ".join(pairs)) if pairs else "unresolved"
+            if flags.d12_refinements and flags.tier_eliminate:
+                eliminate(TIER_ELIM)  # propagation after each assignment
 
     res.parked = {r: set(c) for r, c in cand.items() if r not in assigned}
+    for r, c in sorted(res.parked.items()):
+        res.queue.append({"kind": "optional_resource", "slot": "", "cases": " ".join(sorted(c)), "anchors": r,
+                          "shape": f"1v{len(c)}", "outcome": "not emitted"})
     if res.parked:
         res.notes.append(f"{len(res.parked)} optional resources left unattributed (not emitted)")
 
@@ -269,3 +329,13 @@ def resolve(cases: list[Case], runs: RunIndex, edges: EdgeLog, flags: Flags, sto
                     res.assignments[c.case_id][rid] = Assignment(rid, c.case_id, TIER_EVIDENCE)
                     res.counts[TIER_EVIDENCE] += 1
     return res
+
+
+def write_ambiguity_queue(rows: list[dict], path) -> None:
+    """code/evaluation/ambiguity_queue.csv (D12): one row per slot with account-less cases and per parked resource."""
+    import csv
+
+    with open(path, "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=["kind", "slot", "cases", "anchors", "shape", "outcome"], lineterminator="\n")
+        w.writeheader()
+        w.writerows(rows)

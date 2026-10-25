@@ -149,3 +149,20 @@ def test_m3_acceptance_on_dataset():
     assert r["res"].counts["1"] >= 0.95 * 927  # P13 hard links (M2 parses more log layouts, so more is expected)
     base = acc.run_config("1-3", dataclasses.replace(config.Flags(), tier_chains=False), ctx)
     assert r["eval_accounts"] > base["eval_accounts"]  # 3b ablation
+
+
+def test_d12_tier4b_cooccurrence_and_most_constrained_first_with_queue():
+    from datetime import timedelta as td
+    from ghost.facts import Fact, FactStore
+    r1 = T0 + td(days=1)
+    cases = [Case("case_5", "u1", T0, r1), Case("case_6", "u2", T0, r1 + td(days=3))]
+    evs = [ev("a1", "account_1", -70, ANCHOR), ev("a2", "account_2", -60, ANCHOR)]
+    store = FactStore()  # account_2 is mentioned only in a file captured 1 h before case_6's audit_at
+    store.add(Fact("f#1", "f", r1 + td(days=3, hours=-1), r1 + td(days=3, hours=-1), "log", "1", resource_id="account_2"))
+    flags = dataclasses.replace(config.Flags(), tier_chains=False, tier_eliminate=False)
+    res = resolve(cases, RunIndex(evs, {T0: ["case_5", "case_6"]}), EdgeLog(), flags, store)
+    assert res.assignments["case_6"]["account_2"].tier == "4b"  # exactly one candidate fits the 24 h window
+    assert res.assignments["case_5"]["account_1"].tier == "5"  # the rest goes to the tie-break (low confidence)
+    assert res.queue and res.queue[0]["shape"] == "1v1"
+    off = resolve(cases, RunIndex(evs, {T0: ["case_5", "case_6"]}), EdgeLog(), dataclasses.replace(flags, d12_refinements=False), store)
+    assert off.assignments["case_5"]["account_1"].tier == "5" and "4b" not in {a.tier for x in off.assignments.values() for a in x.values()}

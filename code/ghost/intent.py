@@ -75,6 +75,7 @@ class IntentResult:
     source: str = "rules"  # rules | llm | cascade | rules(suspicious) | default
     suspicious: bool = False
     escalated: bool = False
+    low_confidence: bool = False
     rules: bool | None = None
     llm: bool | None = None
     notes: list[str] = field(default_factory=list)
@@ -93,10 +94,7 @@ def split_flagged(text: str) -> tuple[list[str], list[str]]:
     return clean, flagged
 
 
-def rules_decide(text: str) -> bool | None:
-    """True / False / None (undecided). Instruction-like sentences are ignored (they are data, not requests)."""
-    clean, _ = split_flagged(_norm(text))
-    body = " ".join(clean)
+def _rules_on(body: str) -> bool | None:
     if any(r.search(body) for r in _NEG):
         return False
     if any(r.search(body) for r in _DELETE):
@@ -104,6 +102,23 @@ def rules_decide(text: str) -> bool | None:
     if any(r.search(body) for r in _NONDEL):
         return False
     return None
+
+
+def rules_decide_ex(text: str) -> tuple[bool | None, bool]:
+    """-> (decision, low_confidence). Instruction-like sentences are ignored (they are data, not requests). If that
+    leaves the rules undecided while sentences were dropped (OQ-16), the rules run on the FULL text as analysis
+    (the text is never rewritten) and the answer is marked low confidence."""
+    norm = _norm(text)
+    clean, flagged = split_flagged(norm)
+    d = _rules_on(" ".join(clean))
+    if d is None and flagged:
+        return _rules_on(norm), True
+    return d, False
+
+
+def rules_decide(text: str) -> bool | None:
+    """True / False / None (undecided)."""
+    return rules_decide_ex(text)[0]
 
 
 # ---- gate -------------------------------------------------------------------------------------------------------------
@@ -119,8 +134,10 @@ class IntentGate:
             if t in self.results:
                 continue
             sus = untrusted.suspicious(_norm(t))
-            r = rules_decide(t)
-            res = IntentResult(authorizes_deletion=True if r is None else r, rules=r, suspicious=sus, source="rules")
+            r, low = rules_decide_ex(t)
+            res = IntentResult(authorizes_deletion=True if r is None else r, rules=r, suspicious=sus, source="rules", low_confidence=low)
+            if low:
+                res.notes.append("undecided after dropping flagged sentences: rules on the full text (low confidence)")
             if r is None:
                 res.source, res.notes = "default", ["rules undecided"]
             self.results[t] = res

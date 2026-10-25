@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from ghost import config, loaders, steps, validate  # noqa: E402
 from ghost.pipeline import build_context, solve_all  # noqa: E402
+from ghost.resolve import write_ambiguity_queue  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -23,13 +24,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--output", type=lambda p: Path(p), default=config.OUTPUT_PATH)
     ap.add_argument("--llm-profile", choices=("local", "final"), default=None)
     ap.add_argument("--no-validate", action="store_true")
+    ap.add_argument("--run-label", default="main", help="label written to the usage ledger (usage_report.md filters on it)")
     ap.add_argument("--no-llm", action="store_true", help="rules only: no model calls")
     args = ap.parse_args(argv)
 
     profile = config.get_llm_profile(args.llm_profile)
     requests = loaders.load_requests(args.dataset)  # D1: output order = input order
-    ctx = build_context(args.dataset, llm_profile=None if args.no_llm else profile, run_label="main")
+    ctx = build_context(args.dataset, llm_profile=None if args.no_llm else profile, run_label=args.run_label)
     results = solve_all(ctx, requests)
+    write_ambiguity_queue(ctx.resolution.queue, config.REPO_ROOT / "code" / "evaluation" / "ambiguity_queue.csv")
     rows = [(r.case_id, r.status, r.steps_json()) for r in results]
     steps.write_output(rows, args.output)
     print(f"wrote {len(rows)} rows to {args.output} (llm profile: {profile})")

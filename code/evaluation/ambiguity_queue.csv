@@ -1,0 +1,69 @@
+kind,slot,cases,anchors,shape,outcome
+account_slot,2026-01-15T12:00:00+00:00,case_527 case_529,account_3693 account_4063,2v2,tier 5: case_527=account_3693 case_529=account_4063
+account_slot,2026-02-11T12:00:00+00:00,case_456 case_457,account_2761 account_3584,2v2,tier 5: case_456=account_2761 case_457=account_3584
+account_slot,2026-02-12T23:00:00+00:00,case_61,,1v0,unresolved (no anchor left)
+account_slot,2026-02-22T06:00:00+00:00,case_449 case_451,account_5718 account_1895,2v2,tier 5: case_449=account_5718 case_451=account_1895
+account_slot,2026-03-08T08:00:00+00:00,case_425 case_427,account_8461 account_9633,2v2,tier 5: case_425=account_8461 case_427=account_9633
+account_slot,2026-03-09T21:00:00+00:00,case_46,,1v0,unresolved (no anchor left)
+account_slot,2026-03-11T08:00:00+00:00,case_423 case_424,account_2696 account_2420,2v2,tier 5: case_423=account_2696 case_424=account_2420
+account_slot,2026-03-13T10:00:00+00:00,case_410 case_411 case_412,account_163 account_2775 account_8985,3v3,tier 5: case_410=account_163 case_411=account_2775 case_412=account_8985
+account_slot,2026-03-16T10:00:00+00:00,case_408 case_409,account_5754 account_7174,2v2,tier 5: case_408=account_5754 case_409=account_7174
+account_slot,2026-03-19T10:00:00+00:00,case_404 case_406,account_1759 account_8997,2v2,tier 5: case_404=account_1759 case_406=account_8997
+account_slot,2026-04-15T09:00:00+00:00,case_347 case_349,account_3372 account_9881,2v2,tier 5: case_347=account_3372 case_349=account_9881
+account_slot,2026-04-18T09:00:00+00:00,case_344 case_345 case_346,account_8834 account_486 account_5214,3v3,tier 5: case_344=account_8834 case_345=account_486 case_346=account_5214
+account_slot,2026-04-29T00:00:00+00:00,case_55,,1v0,unresolved (no anchor left)
+account_slot,2026-05-01T07:00:00+00:00,case_296 case_298,account_4267 account_4880,2v2,tier 5: case_296=account_4267 case_298=account_4880
+account_slot,2026-05-04T07:00:00+00:00,case_294 case_295,account_9091 account_6996,2v2,tier 5: case_294=account_9091 case_295=account_6996
+account_slot,2026-05-12T09:00:00+00:00,case_275 case_276,account_2352 account_4853,2v2,tier 5: case_275=account_2352 case_276=account_4853
+account_slot,2026-05-23T22:00:00+00:00,case_53,,1v0,unresolved (no anchor left)
+account_slot,2026-06-09T12:00:00+00:00,case_243 case_244,account_7650 account_4264,2v2,tier 5: case_243=account_7650 case_244=account_4264
+account_slot,2026-06-17T07:00:00+00:00,case_225 case_226,account_669 account_392,2v2,tier 5: case_225=account_669 case_226=account_392
+account_slot,2026-06-18T03:00:00+00:00,case_52,,1v0,unresolved (no anchor left)
+account_slot,2026-06-27T12:00:00+00:00,case_179 case_181,account_3482 account_5309,2v2,tier 5: case_179=account_3482 case_181=account_5309
+account_slot,2026-06-28T09:00:00+00:00,case_203 case_205,account_2399 account_6726,2v2,tier 5: case_203=account_2399 case_205=account_6726
+account_slot,2026-06-30T12:00:00+00:00,case_176 case_178,account_9877 account_1090,2v2,tier 5: case_176=account_9877 case_178=account_1090
+account_slot,2026-07-03T11:00:00+00:00,case_188 case_190,account_7063 account_796,2v2,tier 5: case_188=account_7063 case_190=account_796
+account_slot,2026-07-13T01:00:00+00:00,case_50,,1v0,unresolved (no anchor left)
+account_slot,2026-07-18T02:00:00+00:00,case_33,,1v0,unresolved (no anchor left)
+account_slot,2026-08-06T23:00:00+00:00,case_39,,1v0,unresolved (no anchor left)
+account_slot,2026-08-10T06:00:00+00:00,case_95 case_97,account_6813 account_4176,2v2,tier 5: case_95=account_6813 case_97=account_4176
+account_slot,2026-08-13T12:00:00+00:00,case_107 case_108,account_6750 account_7510,2v2,tier 5: case_107=account_6750 case_108=account_7510
+account_slot,2026-08-16T12:00:00+00:00,case_104 case_106,account_8804 account_4514,2v2,tier 5: case_104=account_8804 case_106=account_4514
+account_slot,2026-08-26T10:00:00+00:00,case_59 case_60,account_3865 account_631 account_5661,2v3,tier 5: case_59=account_3865 case_60=account_631
+account_slot,2026-08-27T08:54:00+00:00,case_04,,1v0,unresolved (no anchor left)
+account_slot,2026-08-29T10:00:00+00:00,case_56 case_58,account_5715 account_9862,2v2,tier 5: case_56=account_5715 case_58=account_9862
+account_slot,2026-08-30T12:00:00+00:00,case_27 case_29,account_3866 account_7012,2v2,tier 5: case_27=account_3866 case_29=account_7012
+account_slot,2026-08-31T21:00:00+00:00,case_35,,1v0,unresolved (no anchor left)
+account_slot,2026-09-04T22:00:00+00:00,case_45,,1v0,unresolved (no anchor left)
+account_slot,2026-09-05T12:00:00+00:00,case_546 case_548,account_294 account_8832 account_7015,2v3,tier 5: case_546=account_294 case_548=account_8832
+account_slot,2026-09-15T22:20:00+00:00,case_63,,1v0,unresolved (no anchor left)
+account_slot,2026-09-26T02:00:00+00:00,case_34,,1v0,unresolved (no anchor left)
+optional_resource,,case_103 case_19,account_4070,1v2,not emitted
+optional_resource,,case_59 case_60,account_5661,1v2,not emitted
+optional_resource,,case_546 case_548,account_7015,1v2,not emitted
+optional_resource,,case_308 case_310,analytics_096,1v2,not emitted
+optional_resource,,case_299 case_300 case_301,analytics_1733,1v3,not emitted
+optional_resource,,case_326 case_328,analytics_2072,1v2,not emitted
+optional_resource,,case_215 case_217,analytics_2504,1v2,not emitted
+optional_resource,,case_318 case_319,analytics_2601,1v2,not emitted
+optional_resource,,case_335 case_336 case_337,analytics_3108,1v3,not emitted
+optional_resource,,case_103 case_19,analytics_3264,1v2,not emitted
+optional_resource,,case_273 case_274,analytics_4051,1v2,not emitted
+optional_resource,,case_395 case_396 case_397,analytics_4651,1v3,not emitted
+optional_resource,,case_260 case_261,analytics_5053,1v2,not emitted
+optional_resource,,case_458 case_459 case_460,analytics_5221,1v3,not emitted
+optional_resource,,case_21 case_23 case_546 case_547 case_548,analytics_5335,1v5,not emitted
+optional_resource,,case_494 case_495 case_496,analytics_5443,1v3,not emitted
+optional_resource,,case_77 case_78 case_79,analytics_5859,1v3,not emitted
+optional_resource,,case_164 case_166,analytics_6402,1v2,not emitted
+optional_resource,,case_497 case_498 case_499,analytics_6565,1v3,not emitted
+optional_resource,,case_233 case_234 case_235,analytics_6723,1v3,not emitted
+optional_resource,,case_447 case_448,analytics_7270,1v2,not emitted
+optional_resource,,case_155 case_156 case_157,analytics_7372,1v3,not emitted
+optional_resource,,case_426 case_427,analytics_8091,1v2,not emitted
+optional_resource,,case_155 case_156 case_157,analytics_8425,1v3,not emitted
+optional_resource,,case_233 case_234 case_235,analytics_8565,1v3,not emitted
+optional_resource,,case_464 case_465 case_466,analytics_8746,1v3,not emitted
+optional_resource,,case_96 case_97,analytics_9103,1v2,not emitted
+optional_resource,,case_287 case_288 case_289,legal_hold_1745,1v3,not emitted
+optional_resource,,case_100 case_98 case_99,legal_hold_668,1v3,not emitted
