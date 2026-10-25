@@ -1402,3 +1402,77 @@ branch=main
 repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
 worktree=main
 parent_agent=none
+## [2026-10-25T10:52:00+05:30] OQ-10 (contrary-link exclusion) and OQ-11 review
+
+User Prompt (verbatim, secrets redacted):
+i think we need to relook the regex , claude code has raised an open question after session 3 
+OQ-10, a rule beyond the design
+
+Agent Response Summary:
+Audited OQ-10 by re-running M3 in the review VM: of 1,808 (case, resource) exclusions, 1,768 (98%) are within-slot competition (the foreign owner is another requester in an overlapping run window) and the remaining 40 are resources of scenario-case users or a non-requesting person falling inside generated slots; every link is exact-validated (email 38, user_id 14, phone 1), so the identifier regex is not the cause and needs no change. Approved option (a) as rule G-LNK-06, keeping the existing shared-context safeguard. Answered OQ-11: keep DESIGN bands, flag 3b-only assignments low-confidence, and handle evidence-only noise in M4 with new candidate rule G-STP-08 (a non-account resource needs a state observation between run anchor and audit_at). Updated the session 4 prompt.
+
+Actions:
+* Ran M3 resolution components (code/scripts/m3_acceptance.py loaders) with exclusion-audit queries
+* Edited docs/OPEN_QUESTIONS.md (OQ-10, OQ-11 answered), docs/RULES.md (G-LNK-06, G-STP-08), docs/CLAUDE_CODE_KICKOFF.md (session 4)
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T11:03:00+05:30] Bracket / pipe / syslog log layouts
+
+User Prompt (verbatim, secrets redacted):
+yes , but what about this issue , the bracket and pipe cases 
+
+bracket: [account_service] [tr-6074163] profile_lookup_started: ...
+pipe: | security_service | tr-5156005 | audit_record_read_completed | ...
+syslog: <15>1 node-1 account_service tr-4973247 - - ...
+
+Agent Response Summary:
+Verified with the production log_parser per file: bracket (218 lines), pipe (231) and syslog (232) layouts get a trace id on 100% of lines, as do cloud-runtime logs; the only untraced lines are infrastructure noise or self-contained single-line records. The gap was only in the planning probes (P04/P13/P14 matched trace_id= only), which explains M3's 83 extra hard links; decisions are unaffected because M3 re-measured precision on the full parser. Added small hardening for unseen layouts to the session 4 prompt: a bare-token trace fallback, a per-file parser self-check, and a unit test per layout. Recorded as an addendum in docs/REVIEW_S1_S2.md.
+
+Actions:
+* Ran per-file trace-extraction checks with code/ghost/evidence/log_parser.py
+* Edited docs/REVIEW_S1_S2.md (addendum) and docs/CLAUDE_CODE_KICKOFF.md (session 4)
+
+Context:
+tool=Claude (claude.ai app)
+model=claude-opus-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+
+## [2026-10-25T13:40:00+05:30] Session 4: M4 state, policy, citations, steps, first scored output
+
+User Prompt (verbatim, secrets redacted):
+the open questions oq10 and 11 are answered , lets proceed with session 4
+
+## Session 4: M4 (state, policy, citations, steps, first scored output)
+Read docs/DESIGN.md §6, §7, §9, §12, §13 and docs/RULES.md (HARD + GOOD). Log per AGENTS.md.
+Before coding, read docs/REVIEW_S1_S2.md "Findings to carry into M3/M4" (items 1–6) and DESIGN §6 (updated): they are mandatory for state derivation. Also read OQ-10 / OQ-11 answers in docs/OPEN_QUESTIONS.md and implement candidate rule G-STP-08 behind a flag (`require_observation_to_emit=True`); report sample metrics with the flag on and off. Small hardening first (≤15 min): docs/REVIEW_S1_S2.md "Addendum (11:03)" items 1–3 (bare-token trace fallback, parser self-check, one test per log layout).
+Implement M4: state.py, policy.py (driven by dataset/deletion_rules.csv), citations.py, steps, status; then code/evaluation/main.py with the §13 metrics on the 32 samples.
+Acceptance: status >= 30/32, step F1 >= 0.85, sequence-exact >= 22/32; validator passes on the full 518-row output.
+For every sample mismatch, write a one-line diagnosis (rule ID involved) into code/evaluation/evaluation_report.md under "Failures found". Do not change rules to fit samples. Record proposals in OPEN_QUESTIONS. Stop after M4.
+
+Agent Response Summary:
+Implemented M4 (state.py, policy.py, citations.py, pipeline.py, evaluation harness) plus the addendum hardening (bare-token trace fallback, per-file parser self-check, layout tests). Sample result with G-STP-08 on: status 32/32, step precision/recall/F1 1.000/0.953/0.976, sequence-exact 25/32, citations 69/75 (the 6 misses are missing steps, no aligned citation differs); G-STP-08 off: F1 0.971, sequence-exact 23/32 (2 extra steps). The full 518-row output validates (179 COMPLETE, 339 INCOMPLETE; intent is a stub until M5; 71 cases lack an account step because tiers 4/5 are stubs). First run was 28/32 and F1 0.901; four rule-application bugs were fixed (documented in the report and OQ-12/13). Remaining 9 missing steps are 3 ceiling items plus 6 tier-4/5 attributions. pytest 73 passed; M2 and M3 acceptance unchanged (M3 sample precision 79/79). The Bash/PowerShell classifier failed for a stretch mid-session; code was written with file tools until it recovered.
+
+Actions:
+* Created code/ghost/{state,policy,citations,pipeline}.py; rewrote code/main.py, code/evaluation/main.py, code/ghost/intent.py (stub)
+* Edited code/ghost/{config,facts,resolve}.py and code/ghost/evidence/{__init__,json_parser,log_parser,normalize,pdf_parser}.py
+* Created code/tests/test_m4.py; wrote code/evaluation/evaluation_report.md; edited docs/OPEN_QUESTIONS.md (OQ-12, OQ-13)
+* Ran pytest, scripts/m2_acceptance.py, scripts/m3_acceptance.py, evaluation/main.py, main.py (output.csv rewritten, validated)
+
+Context:
+tool=Claude Code
+model=claude-sonnet-5-5
+branch=main
+repo_root=E:\hackerrank-orchestrate\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none

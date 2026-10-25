@@ -41,6 +41,7 @@ class Flags:
     tier_chains: bool = True  # tier 3b, W-LNK-05
     tier_llm: bool = True
     tier_tiebreak: bool = True
+    require_observation_to_emit: bool = True  # G-STP-08: a non-account resource needs an observation in the window
     exclude_foreign_links: bool = True  # OQ-10: a validated link to another user excludes the case
     evidence_only_links: bool = True  # G-LNK-01: audit records, attachments and copies found only in evidence
     chain_policy_band: tuple = (9, 11)  # W-LNK-05, seconds mod 30

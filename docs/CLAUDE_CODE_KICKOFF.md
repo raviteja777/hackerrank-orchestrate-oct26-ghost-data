@@ -50,7 +50,7 @@ Acceptance: sample-side precision of case-resource assignment >= 38/39 (P14) and
 ## Session 4: M4 (state, policy, citations, steps, first scored output)
 ```
 Read docs/DESIGN.md §6, §7, §9, §12, §13 and docs/RULES.md (HARD + GOOD). Log per AGENTS.md.
-Before coding, read docs/REVIEW_S1_S2.md "Findings to carry into M3/M4" (items 1–6) and DESIGN §6 (updated): they are mandatory for state derivation.
+Before coding, read docs/REVIEW_S1_S2.md "Findings to carry into M3/M4" (items 1–6) and DESIGN §6 (updated): they are mandatory for state derivation. Also read OQ-10 / OQ-11 answers in docs/OPEN_QUESTIONS.md and implement candidate rule G-STP-08 behind a flag (`require_observation_to_emit=True`); report sample metrics with the flag on and off. Small hardening first (≤15 min): docs/REVIEW_S1_S2.md "Addendum (11:03)" items 1–3 (bare-token trace fallback, parser self-check, one test per log layout).
 Implement M4: state.py, policy.py (driven by dataset/deletion_rules.csv), citations.py, steps, status; then code/evaluation/main.py with the §13 metrics on the 32 samples.
 Acceptance: status >= 30/32, step F1 >= 0.85, sequence-exact >= 22/32; validator passes on the full 518-row output.
 For every sample mismatch, write a one-line diagnosis (rule ID involved) into code/evaluation/evaluation_report.md under "Failures found". Do not change rules to fit samples. Record proposals in OPEN_QUESTIONS. Stop after M4.

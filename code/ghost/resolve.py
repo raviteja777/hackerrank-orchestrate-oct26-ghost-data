@@ -125,8 +125,19 @@ def resolve(cases: list[Case], runs: RunIndex, edges: EdgeLog, flags: Flags) -> 
                 assign(rid, next(iter(linked)), TIER_HARD)
             elif len(linked) > 1:
                 cand[rid] = linked  # multi-link: parked with the linked candidates only
-            elif len(cand[rid]) == 1:
-                assign(rid, next(iter(cand[rid])), TIER_SINGLE)
+        # naked singles (single-case window) come after all hard links so that H-STP-05 (at most one resource per
+        # type per case) can reject a window event whose case already holds a hard-linked resource of that type
+        for rid in sorted(cand):
+            if rid in assigned or len(cand[rid]) != 1:
+                continue
+            cid = next(iter(cand[rid]))
+            if any(_type(o) == _type(rid) and assigned[o] == cid for o in assigned):
+                res.counts["single_rejected_h_stp_05"] += 1
+                cand[rid] = set()
+                continue
+            assign(rid, cid, TIER_SINGLE)
+        for rid in [r for r, c in cand.items() if not c]:
+            del cand[rid]
 
     def eliminate(tier: str) -> None:
         changed = True

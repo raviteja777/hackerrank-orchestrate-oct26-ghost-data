@@ -45,6 +45,7 @@ class ParsedFile:
     capture_time: datetime | None = None
     scopes: list[ScopeInfo] = field(default_factory=list)
     unparsed_reason: str | None = None
+    stats: dict[str, int] = field(default_factory=dict)  # parser self-check counters (logs)
 
 
 def flatten(value: Any, prefix: str = "", out: dict[str, Any] | None = None, max_items: int = 50) -> dict[str, Any]:

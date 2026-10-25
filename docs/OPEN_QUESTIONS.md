@@ -57,7 +57,7 @@ Used by Claude Code during the build (DESIGN.md §15.1). The user takes each ope
 - Options: (a) exclude (b) keep P13 behaviour
 - Default implemented now: (a), flag `exclude_foreign_links=True` (config.Flags). 17 resources excluded. Sample precision 79/80 with it; 78/84 without.
 - Impact if wrong: some run resources linked to a second user would be dropped from a case; none seen in the samples.
-- Status: OPEN
+- Status: ANSWERED (2026-10-25 planning chat): **(a) approved**, flag stays on; promoted to rule G-LNK-06. Planning-chat audit of all 1,808 (case, resource) exclusions: 1,768 (98%) are within-slot competition (the foreign user is itself a requester whose run window contains the event); the other 40 are resources of scenario-case users (users 11–22, e.g. search_428 → user_13 / case_35) or of a non-requesting person (search_7455 → user_59) that fall inside generated slots' windows. All links are exact-validated (email 38, user_id 14, phone 1); no decoy or fuzzy match is involved, so **no regex change is needed**. Keep the implemented safeguard: a case is kept when its own user is *also* linked (shared-context records, rule_05).
 
 ### OQ-11: M3 numbers vs the probes, band sensitivity, evidence-only noise (informational)
 - Raised by / when: Claude Code, claude-sonnet-5-5, 2026-10-25 (M3)
@@ -65,4 +65,21 @@ Used by Claude Code during the build (DESIGN.md §15.1). The user takes each ope
 - Question: none blocking. 3b remains a probable generator artifact (W-LNK-05); it is switchable (`tier_chains`) and the ablation is reported.
 - Default implemented now: DESIGN bands (config `chain_policy_band`, `chain_final_band`).
 - Impact if wrong: eval account assignment (tier 3b) could be less reliable than the sample precision suggests, because only 4 sample cases are unresolved and the true pairs were used to derive the bands.
-- Status: OPEN (informational)
+- Status: ANSWERED (2026-10-25 planning chat): (1) accepted, the extra links come from layouts the probe could not parse. (2) keep the DESIGN bands (447/518, same precision); mark every 3b-only assignment `confidence=low` and report the ablation with the overfitting caveat. (3) evidence-only noise: handled in M4 by new rule G-STP-08 (emit a non-account resource only if it has a state observation with fact_time between the case's run anchor and audit_at; catalog-only links such as tombstone_17 / object_19 then produce no step). (4) accepted; see whether G-STP-08 or C3 removes it in M4.
+
+### OQ-12: how snapshot scope and replica copies enter the state (M4 rule proposals)
+- Raised by / when: Claude Code, claude-sonnet-5-5, 2026-10-25 (M4)
+- Context: a first run (status 28/32) showed two misapplications of G-EVD-01 / G-SYS-01. (1) A bundle snapshot lists only a few records, so "the resource is missing from a covering snapshot" overrode explicit observations (case_12, case_19). (2) A primary-side 404 cleared a failover-replica copy that still held the record (case_05).
+- Question: confirm the rules now implemented: (a) scope proof of absence is used only for a resource with no explicit observation in the window (still covers accounts such as case_01/02/31); (b) each copy (topology) is judged separately: a violating copy is cleared only by a later or equal good observation of the same copy; ties go to the violation.
+- Options: (a) as implemented (b) scope proof always counts
+- Default implemented now: (a), no flag (they are bug fixes of the stated rules). Samples: status 32/32.
+- Impact if wrong: absence of unobserved non-account resources would not be proven by a scope; replica findings might be over-reported.
+- Status: OPEN
+
+### OQ-13: naked singles and H-STP-05; documents as presence evidence; M4 stubs
+- Raised by / when: Claude Code, claude-sonnet-5-5, 2026-10-25 (M4)
+- Context: (1) A window naked single is now assigned after all hard links and rejected when the case already holds a resource of that type (H-STP-05); fixes case_11 analytics_9447, M3 precision 79/79. (2) A PDF that names a resource id is a presence observation for record / retention kinds, and an "attachment" cue makes it SUPPORT_ATTACHMENT (support_001, case_07). (3) `intent.authorizes_deletion` is a stub (always true) until M5, so the 10 non-deletion eval requests currently get audit steps. (4) 71 eval cases have no account step because tiers 4 and 5 are stubs (H-STP-02 not yet satisfiable for them).
+- Question: none blocking. Please confirm (1) and (2) as rule applications.
+- Default implemented now: as described; the missing account steps are a known M4 limit.
+- Impact if wrong: (1) a genuine second same-type resource in one case would be dropped; (2) a register PDF that names a resource would count as an observation.
+- Status: OPEN

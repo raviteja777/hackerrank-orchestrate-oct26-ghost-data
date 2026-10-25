@@ -42,6 +42,7 @@ class Fact:
     ident_fields: dict[str, bool] = field(default_factory=dict)  # identifier field -> non-null?
     fields: dict[str, Any] = field(default_factory=dict)  # flattened raw record
     line_span: tuple[int, int] | None = None  # source lines (logs, txt)
+    text_mentions: frozenset[str] = frozenset()  # users whose validated identifiers occur in free-text fields
 
     def citable(self, audit_at: datetime) -> bool:
         return self.file_captured_at <= audit_at  # S-TIM-01, H-TIM-03
@@ -76,6 +77,7 @@ class FactStore:
         self.unparsed: list[tuple[str, str, str]] = []  # (file_id, path, reason)
         self.decoys: list[tuple[str, str, str, str]] = []  # (fact_id, kind, token, outcome)
         self.dropped_noise = 0
+        self.parser_report: list[dict] = []  # per log file self-check (share of carrying lines with a trace id)
         self._by_resource: dict[str, list[Fact]] = defaultdict(list)
         self._by_user: dict[str, list[Fact]] = defaultdict(list)
         self._by_file: dict[str, list[Fact]] = defaultdict(list)

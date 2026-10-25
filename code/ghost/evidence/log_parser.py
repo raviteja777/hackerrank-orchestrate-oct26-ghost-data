@@ -24,6 +24,9 @@ BRACKET_RE = re.compile(r"^\[(\w+)\]\s+\[([^\]]*)\]\s+\[([^\]]*)\]\s+([\w.\-]+):
 PIPE_RE = re.compile(r"^\|?\s*(\w+)\s*\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|\s*([\w.\-]+)\s*\|\s*(.*)$")
 SYSLOG_RE = re.compile(r"^<(\d+)>\d+\s+(\S+)\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+(.*)$")
 TRACE_KEYS = ("trace_id", "requestId", "request_id")
+BARE_TRACE_RE = re.compile(r"\b(?:tr|rb|req)-[A-Za-z0-9-]+\b")
+_IDENT_HINT = re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}|\buser_\d+\b", re.I)
+SELFCHECK_MIN_SHARE = 0.90
 NOISE_EVENTS = {"cache_lookup", "connection_acquired", "dependency_retry"}  # infra lines: time only
 
 
@@ -79,6 +82,10 @@ def parse_line(rest: str) -> tuple[dict[str, Any], str | None, str | None]:
         if fields.get(k):
             trace = str(fields[k])
             break
+    if not trace:  # hardening for unseen layouts: bare trace-shaped token anywhere on the line
+        m = BARE_TRACE_RE.search(rest)
+        if m:
+            trace = m.group(0)
     service = fields.get("service") or fields.get("logger") or service
     return fields, trace, service
 
@@ -87,6 +94,7 @@ def parse(f: EvidenceFile, text: str) -> ParsedFile:
     out = ParsedFile("log")
     groups: "OrderedDict[str, list[tuple[int, datetime, dict]]]" = OrderedDict()
     solo: list[tuple[int, datetime, dict]] = []
+    lines = carrying = orphans = 0
     for n, raw in enumerate(text.splitlines(), start=1):
         m = TS_RE.match(raw.strip())
         if not m:
@@ -95,14 +103,24 @@ def parse(f: EvidenceFile, text: str) -> ParsedFile:
             t = parse_ts(m.group(1))
         except ValueError:
             continue
+        lines += 1
         fields, trace, service = parse_line(m.group(2))
         if service and "service" not in fields:
             fields["service"] = service
+        # self-check: lines carrying a resource id or an identifier must have a trace id, unless they are
+        # self-contained records (resource id and identifier on the same line, e.g. record_lookup)
+        has_res = bool(fields.get("resource_id"))
+        has_ident = bool(_IDENT_HINT.search(m.group(2)))
+        if has_res or has_ident:
+            carrying += 1
+            if not trace and not (has_res and has_ident):
+                orphans += 1
         item = (n, t, fields)
         if trace:
             groups.setdefault(trace, []).append(item)
         else:
             solo.append(item)
+    out.stats = {"lines": lines, "carrying": carrying, "orphans": orphans}
 
     def emit(key: str, lines: list[tuple[int, datetime, dict]], trace: str | None) -> None:
         merged: dict[str, Any] = {}

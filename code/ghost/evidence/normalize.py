@@ -25,6 +25,9 @@ _IDENT_COLUMNS = {
 }
 
 
+_FREE_TEXT_KEYS = {"message_text", "message_excerpt", "note", "notes", "comment", "body", "text", "excerpt"}
+
+
 def _to_int(v: Any) -> int | None:
     try:
         return int(str(v).strip())
@@ -65,8 +68,16 @@ def signals_from(fields: dict[str, Any], event: str | None) -> dict[str, Any]:
         s["result"] = str(first("result"))
     if first("state") is not None:  # handover STATE label
         s["state_label"] = str(first("state"))
+    di = _to_int(f.get("direct_identifiers"))  # analytics_profile_read / analytics_identity_scan (review item 1)
+    if di is not None:
+        s["direct_identifiers"] = di
+    if f.get("decision") is not None:  # restore_authorization_completed: deny -> blocked (review item 2)
+        s["decision"] = str(f["decision"]).lower()
+    if f.get("detector") is not None or f.get("matched_value") is not None:  # *_pii_scan (review item 3)
+        s["pii_match"] = f.get("matched_value") is not None
+        s["detector"] = str(f.get("detector") or "")
     for key in ("enabled", "restore_allowed", "eligible", "deletion_block", "marker_found", "email_opt_in",
-                "scheduler_registered", "download_available"):
+                "scheduler_registered", "download_available", "available"):
         b = _to_bool(f.get(key))
         if b is not None:
             s[key] = b
@@ -106,6 +117,12 @@ def _record_to_fact(f: loaders.EvidenceFile, parsed: ParsedFile, rec: RawRecord,
     for kind, token, outcome in rejected:
         store.decoys.append((fact_id, kind, token, outcome))
 
+    # validated identifiers inside free text (message_text, message_excerpt, ...): exposure for REDACT /
+    # ANONYMIZE categories (review item 3); the policy compares the users with the case's user.
+    free = " ".join(str(v) for k, v in fields.items()
+                    if v and k.rsplit(".", 1)[-1] in _FREE_TEXT_KEYS)
+    text_mentions = frozenset(u for u, _, _ in links(index.scan(free, fact_id))) if free else frozenset()
+
     system = catalog.system_for(rid, rec.system_hint)
     if rid and system is None:
         system = f"unknown:{catalog.prefix_of(rid)}"  # X-SYS-01: closed vocabulary, no step later
@@ -117,6 +134,7 @@ def _record_to_fact(f: loaders.EvidenceFile, parsed: ParsedFile, rec: RawRecord,
         collection=rec.collection, capture_time=rec.capture_time or parsed.capture_time,
         mentions=mentions, decoys=rejected, signals=signals_from(fields, rec.event),
         ident_fields=ident_fields(fields), fields=dict(fields), line_span=rec.line_span,
+        text_mentions=text_mentions,
     ))
 
 
@@ -134,6 +152,12 @@ def build_fact_store(dataset_dir: Path | None = None, index: IdentityIndex | Non
         if parsed.unparsed_reason and not parsed.records:
             store.unparsed.append((f.file_id, f.file_path, parsed.unparsed_reason))
             continue
+        if parsed.stats:  # log parser self-check: warn when < 90% of carrying lines are traced or self-contained
+            carrying, orphans = parsed.stats["carrying"], parsed.stats["orphans"]
+            share = 1.0 if carrying == 0 else 1.0 - orphans / carrying
+            store.parser_report.append({"file_id": f.file_id, "path": f.file_path, "lines": parsed.stats["lines"],
+                                        "carrying": carrying, "orphans": orphans, "share": round(share, 4),
+                                        "warn": share < 0.90 and carrying >= 10})
         seen: set[str] = set()
         for rec in parsed.records:
             _record_to_fact(f, parsed, rec, index, store, seen)

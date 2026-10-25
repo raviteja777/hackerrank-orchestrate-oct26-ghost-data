@@ -43,3 +43,18 @@ M2 keeps all raw fields, so nothing is lost; M4's state derivation must use thes
 | 5 | M5 lean | 15:45 | priority: intent (rules + local LLM), then screenshot OCR path, vision only if time allows |
 | 6 | M6 | 17:00 | final run, reports, zip; **request the claude.ai export at ~15:30** |
 | — | buffer | 17:00–18:00 | submission |
+
+## Addendum (11:03): bracket / pipe / syslog log layouts
+User question after OQ-11. Verified per file with the M2 `log_parser.parse_line`:
+| Layout | Files | Lines | Trace id extracted |
+|---|---|---|---|
+| bracket `[LEVEL] [service] [tr-…] event:` | application_trace_* (2) | 218 | **218 (100%)** |
+| pipe `\| LEVEL \| service \| tr-… \| event \|` | operations_stream_* (2) | 231 | **231 (100%)** |
+| syslog `<15>1 node service tr-… - -` | syslog_archive_* (2) | 232 | **232 (100%)** |
+| cloud runtime (`requestId`, nested `message=`) | cloud_runtime_* (2) | 433 | 433 (100%) |
+| key=value / JSON | the rest | — | all data lines; the untraced lines are infrastructure noise (log_router, dns_cache, queue_consumer, secret_agent…) or self-contained single-line records (support_replica `contact_query_completed`, record_lookup) |
+Conclusion: the gap was only in the **planning probes** (P04/P13/P14 used a `trace_id=` regex), which is why M3 finds 83 more hard links than P13. The production parser is correct. Sample precision was re-measured on the full parser in M3, so the probe gap does not affect any decision.
+Hardening for unseen layouts (added to the Session 4 prompt, small):
+1. Fallback trace detection: when no layout matches and no `trace_id/requestId/request_id` key exists, take a bare token matching `\b(?:tr|rb|req)-[A-Za-z0-9-]+\b`.
+2. Parser self-check in the run report: per log file, the share of lines carrying a `resource_id` or identifier that received a trace id; warn when < 90%.
+3. One unit test per layout (bracket, pipe, syslog, cloud runtime, JSON, key=value, legacy replica).

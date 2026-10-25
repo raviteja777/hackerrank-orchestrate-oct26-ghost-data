@@ -41,7 +41,9 @@ def parse(f: EvidenceFile, path: Path) -> ParsedFile:
         return out
     when = _captured(text)
     ids = sorted(set(catalog.RESOURCE_ID_RE.findall(text)))
-    base = dict(text=text, fact_time=when)
+    # an attachment document is a SUPPORT_ATTACHMENT, not a message (DESIGN §7.1 refinement via the event cue)
+    cue = "attachment_document" if "attachment" in (text + " " + f.file_path).lower() else None
+    base = dict(text=text, fact_time=when, event=cue)
     if not ids:
         out.records.append(RawRecord(locator="doc", fields={"document": f.file_path}, **base))
     for rid in ids:

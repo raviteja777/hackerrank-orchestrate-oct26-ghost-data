@@ -12,7 +12,7 @@ from typing import Any
 
 from .. import catalog
 from ..loaders import EvidenceFile, parse_ts
-from . import ParsedFile, RawRecord, flatten
+from . import ParsedFile, RawRecord, ScopeInfo, flatten
 
 _OWN_TIME = ("observed_at", "recorded_at", "updated_at", "captured_at")
 _CTX_TIME = ("captured_at", "observed_at", "exported_at", "recorded_at")
@@ -50,6 +50,9 @@ def parse(f: EvidenceFile, text: str) -> ParsedFile:
                     break
             if isinstance(node.get("data_store"), str):
                 sub["system"] = node["data_store"]
+                st = sub.get("time")
+                if st is not None and isinstance(node.get("records"), list):  # bundle snapshot: covers the system
+                    out.scopes.append(ScopeInfo(node["data_store"], "primary", st))
             if isinstance(node.get("collection"), str):
                 sub["collection"] = node["collection"]
             for k, v in node.items():
